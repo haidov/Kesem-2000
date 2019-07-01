@@ -1,0 +1,420 @@
+{% extends 'layouts.html' %}
+{% block body %}
+<head>
+   <style>  
+     .device_div, .attribute_div, #add_to_chart, {
+      display:nonse
+      }
+      #canvas-wrapper, #loading-label{
+          display: none
+      }
+   </style>
+</head>
+<body>
+   <h1>Create a Customized Chart</h1>
+   <center>
+      <form id="chart_options" action="" method="POST">
+         <h2> Please select a customer: </h2>
+         <select name="customer" id="customer">
+            <option value="Please choose one: ">Please choose one...</option>
+            {% for customer in customers %}
+            <option value="{{customer[1]}}">{{customer[1]}}</option>
+            {% endfor %}
+         </select>
+         <div class="device_div">
+            <h2> Please select a device: </h2>
+            <select disabled name="device" id="device">
+               <option value="Please choose one: ">Please choose one...</option>
+            </select>
+         </div>
+         <div class="attribute_div">
+            <h2> Please select an attribute: </h2>
+            <select disabled name="attribute" id="attribute">
+               <option value="Please choose one: ">Please choose one...</option>
+            </select>
+         </div>
+         <br>
+         <button disabled id="add_to_chart" type="submit" class="btn btn-primary">Add</button>
+      </form>
+      <h4 id="loading-label">Loading, Please Wait...</h4>
+      <div id="canvas-wrapper">
+      <div class="col-lg-4">
+         <h2>Timestamp</h2>
+         <div class="input-group">
+            <div class="input-group-prepend">
+               <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+            </div>
+            <input type="text" name="reservation" id="daterangepicker" class="form-control active" value="08/01/2013 1:00 PM - 08/01/2013 1:30 PM">
+         </div>
+      </div>
+      <div style="width: 80% ; height: 50%">
+      <canvas  id="myChart"></canvas>
+      <div>
+   </center>
+   <script>
+      $(document).ready(function() {
+      $('#customer').select2({width: "40%"});
+      $('#device').select2({width: "40%"});
+      $('#attribute').select2({width: "40%"});
+   });
+
+   function eliminateDuplicates(arr) {
+  var i,
+      len = arr.length,
+      out = [],
+      obj = {};
+
+  for (i = 0; i < len; i++) {
+    obj[arr[i]] = 0;
+  }
+  for (i in obj) {
+    out.push(i);
+  }
+  return out;
+}
+      var start = moment().format('DD/MM/YYYY h:mm A');
+      start = moment(start, 'DD/MM/YYYY h:mm A').toDate();
+      start.setHours(0);
+      start.setMinutes(0);
+      start = moment(start).format('DD/MM/YYYY h:mm A');
+      
+      
+      var end = moment().add(1,'d').format('DD/MM/YYYY h:mm A');
+      end = moment(end, 'DD/MM/YYYY h:mm A').toDate();
+      end.setHours(0);
+      end.setMinutes(0);
+      end = moment(end).format('DD/MM/YYYY h:mm A');
+      
+      var init_date = String(start) + " - " + String(end);
+      
+      $("#daterangepicker").val(init_date);
+      
+      var clone = [];
+      $(document).on('click', 'body > div.daterangepicker.dropdown-menu.show-calendar.opensright > div.ranges > div > button.applyBtn.btn.btn-small.btn-sm.btn-success', function() {
+          
+          updateTimestamps(clone);
+          });
+      
+      if ( window.history.replaceState ) {
+          window.history.replaceState( null, null, window.location.href );
+      }
+      
+      var all_customers = document.querySelectorAll('#customer')
+      
+      for (var i = 0; i < all_customers.length; i++) {
+          $("#customer").on('change', function(e) {
+              if (e.target.value != 'Please choose one: ') {
+                  $("#device").empty();
+                  $("#attribute").empty();
+                  $('#device').prepend($('<option value="Please choose one: ">Please choose one...</option>'));
+                  $('#attribute').prepend($('<option value="Please choose one: ">Please choose one...</option>'));
+      
+                  // $(".device_div").show();
+                  //$(".attribute_div").hide();
+                  //$("#add_to_chart").hide();
+
+                   $("#device").prop('disabled', false);
+                   $("#attribute").prop('disabled', 'disabled');
+                   $("#add_to_chart").prop('disabled', 'disabled');
+
+                  // Query code for customers
+                  console.log("Let's choose a device now.");
+                  var selector = document.getElementById('customer');
+                  var device_element = document.getElementById('device');
+                  var customer = selector[selector.selectedIndex].value;
+                  var all_devices = document.querySelectorAll('#device');
+                  var get_all_devices = all_data[customer];
+                      if (get_all_devices != undefined) {
+                          var provider = all_data[customer];
+                          var get_all_devices = all_data[customer];
+                          var how_many_devices = get_all_devices.length;
+                          for (var device_number = 0; device_number < how_many_devices; device_number++) {
+                              var get_all_devices = all_data[customer][device_number].Name;
+                              var opt = document.createElement('option');
+                              opt.value = get_all_devices;
+                              opt.innerHTML = get_all_devices;
+                              device_element.appendChild(opt);
+                          };
+                        const options = []
+
+                        document.querySelectorAll('#device > option').forEach((option) => {
+                            if (options.includes(option.value)) option.remove()
+                            else options.push(option.value)
+                        })
+                      };
+                  for (var i = 0; i < all_devices.length; i++) {
+                        $("#device").on('change', function(e) {
+                          if (e.target.value != 'Please choose one: ') {
+
+                              // $(".attribute_div").show();
+
+                              $("#attribute").prop('disabled', false);
+
+                              // Query code for devices
+                              console.log("Let's choose an attribute now.");
+                                  var get_all_devices = all_data[customer];
+                                  if (get_all_devices != undefined) {
+                                      var get_all_devices = all_data[customer];
+                                      var how_many_devices = get_all_devices.length;
+                                      for (var device_number = 0; device_number < how_many_devices; device_number++) {
+                                            var find_device_name = all_data[customer][device_number].Name;
+                                          var chosen_device = $("#device option:selected").text();
+      
+                                          if (find_device_name == chosen_device){
+                                              var get_all_attributes = all_data[customer][device_number];
+                                              console.log(get_all_attributes);
+                                              var opt = document.createElement('option');
+                                              attribute_element = document.getElementById('attribute');
+                                              for (attribute in get_all_attributes){
+                                              console.log(attribute);
+                                              var opt = document.createElement('option');
+                                              opt.value = attribute;
+                                              opt.innerHTML = attribute;
+                                              attribute_element.appendChild(opt);
+                                              };
+                                              const options = []
+
+                                            document.querySelectorAll('#attribute > option').forEach((option) => {
+                                                if (options.includes(option.value)) option.remove()
+                                                else options.push(option.value)
+                                            })
+                                          };
+                                      };
+                                  };
+                              var all_attributes = document.querySelectorAll('#attribute')
+                              for (var i = 0; i < all_attributes.length; i++) {
+                                    $("#attribute").on('change', function(e) {
+                                      if (e.target.value != 'Please choose one: ') {
+      
+      
+      
+                                          // Query code for attributes
+                                          console.log("attribute is chosen successfully.");
+                                          $("#add_to_chart").prop('disabled', false);
+                                      } else {
+                                          $("#add_to_chart").prop('disabled', 'disabled');
+                                      }
+                                  })
+                              }
+                          } else {
+                              // $(".attribute_div").hide();
+                              // $("#add_to_chart").hide();
+                              $("#attribute").empty();
+                              $('#attribute').prepend($('<option value="Please choose one: ">Please choose one...</option>'));
+                              $("#attribute").prop('disabled', 'disabled');
+
+                          }
+                      })
+                  }
+              } else {
+                  $("#device").empty();
+                  $("#attribute").empty();
+                  $('#device').prepend($('<option value="Please choose one: ">Please choose one...</option>'));
+                  $('#attribute').prepend($('<option value="Please choose one: ">Please choose one...</option>'));
+                  // $(".device_div").hide();
+                  // $(".attribute_div").hide();
+                  // $("#add_to_chart").hide();
+
+                  $("#device").prop('disabled', 'disabled');
+                  $("#attribute").prop('disabled', 'disabled');
+                  $("#add_to_chart").prop('disabled', 'disabled');
+              }
+          })
+      }
+      var myText = 'hello world!';
+      var someString = 'myText';
+      
+      // alert({{customers | safe }})
+      
+      var all_customers = {{ customers | safe }}
+      var all_data = {{ all_data | safe }}
+
+           function getRandomColor() {
+      var letters = '0123456789ABCDEF'.split('');
+      var color = '#';
+      for (var i = 0; i < 6; i++ ) {
+          color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+      }
+      
+      function hasNumber(myString) {
+    return !/\D/.test(myString);
+}
+
+         $(function () {
+      $('#chart_options').on('submit',function (e) {
+      $("#add_to_chart").prop('disabled', 'disabled');
+      $("#loading-label").show();
+                $.ajax({
+                  type: 'post',
+                  data: $('#chart_options').serialize(),
+                  success: function (response) {
+                      $("#add_to_chart").prop('disabled', false);
+                      $("#loading-label").hide();
+                   console.log("Chart will now show up.");
+                   console.log(response.info_for_chart);
+                   $("#canvas-wrapper").show();
+      
+                  var all_timestamps = [];
+                  var all_values = [];
+                  var customer_name = $("#customer option:selected").text();
+                  var device_name = $("#device option:selected").text();
+                  var attribute_name = $("#attribute option:selected").text();
+      
+                  response.info_for_chart.forEach(function(element) {
+                  all_timestamps.push(element[0]);
+                  all_values.push(element[2]);
+                  });
+      
+      
+                  if (first_q == 1){  
+                    first_q = 0;
+                    dataChart.data.datasets.pop();
+                    dataChart.data.labels.pop();
+                    dataChart.update();
+                    updateTimestamps(all_timestamps);
+                    clone = dataChart.data.labels.slice(0);
+                 };
+                  var label = $(this).attr('id');
+                 console.log("Adding value");
+                 updateChart(customer_name + ", " + attribute_name + ", " + device_name, all_values);
+      
+                  }
+                });
+                e.preventDefault();
+          });
+      });
+      
+      var timeFormat = 'DD/MM/YYYY HH:mm';
+      var now = window.moment();
+      
+           var first_q = 1;
+          var config = {
+      type: 'line',
+      data: {
+      labels: [], // Date Objects
+      datasets: [{
+      	label: 'My First dataset',
+      	data: [10, 20, 30, 40, 25],
+      	fill: false,
+      	borderDash: [5, 5],
+      }]
+      },
+      options: {
+                  tooltips: {
+      	mode: 'index',
+      	intersect: false,
+      },
+      responsive: true,
+      title: {
+      	display: true,
+      	text: 'Drag your mouse to zoom-in and double click to zoom-out'
+      },
+      scales: {
+      	xAxes: [{
+      		type: 'time',
+      		time: {
+      			parser: timeFormat,
+      			// round: 'day'
+      			tooltipFormat: 'll HH:mm'
+      		},
+      		scaleLabel: {
+      			display: true,
+      			labelString: 'Date'
+      		},
+      		ticks: {
+      			maxRotation: 0
+      		}
+      	}],
+      	yAxes: [{
+      		scaleLabel: {
+      			display: true,
+      			labelString: 'value'
+      		}
+      	}]
+      },
+      plugins: {
+      	zoom: {
+      		zoom: {
+      			enabled: true,
+      			drag: false,
+      			mode: 'x',
+      			speed: 0.05
+      		}
+      	}
+      }
+      }
+      };
+          
+              
+              
+              function updateChart(newLabel, newData){
+                  var color = getRandomColor();
+                var newDataset = {
+                 label: newLabel,
+                 data: newData,
+                 fill: false,
+                 backgroundColor: color,
+                 borderColor: color
+              }
+            var test = String(newData)
+            test = test.split(",").join("")
+            test = test.split(".").join("")
+            test = test.split("-").join("")
+
+             if (hasNumber(test) == false || test.length <= 0){
+                  alert("Sorry, no numeral info was found for this attribute. Please choose another one.");
+              }
+              else
+              {
+              dataChart.data.datasets.push(newDataset);
+              console.log("data is: " + dataChart.data);
+              dataChart.update();
+              }
+
+              };
+              
+      
+          function updateTimestamps(newDatestamps){
+              // get all timestamps between start and end
+               var dates = $("#daterangepicker").val().split('-');
+              start = dates[0];
+              end = dates[1];
+      
+              var test_start = moment(start, 'DD/MM/YYYY h:mm A').toDate();
+              var test_end = moment(end, 'DD/MM/YYYY h:mm A').toDate();
+      
+              var i = -1;
+      
+               dataChart.data.labels = [];
+              
+               for (timestamp in newDatestamps){
+                   i = i + 1; 
+              date = newDatestamps[i];
+      
+              test_date = moment(date, 'DD/MM/YYYY h:mm A').toDate();
+      
+              console.log("checking if " + test_date.toLocaleString() + " is between " + test_start.toLocaleString() + " and " + test_end.toLocaleString());
+              
+              if(test_start <= test_date && test_date <= test_end){
+                  console.log("it is between");
+                  dataChart.data.labels.push(test_date);
+              }
+              else{
+                  console.log("it is not")
+              }
+              
+               };
+              dataChart.update();
+              };
+      
+      
+      window.onload = function() {
+      var ctx = document.getElementById('myChart').getContext('2d');
+      dataChart = new window.Chart(ctx, config);
+      };
+
+   </script>
+</body>
+{% endblock %}

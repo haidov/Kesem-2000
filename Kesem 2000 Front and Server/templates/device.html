@@ -1,0 +1,284 @@
+{% extends "layouts.html" %}
+{% block body %}
+<!DOCTYPE html>
+<html>
+   <head>
+      <style>
+         .container{
+         float: left;
+         }
+         .table-wrapper , .canvas-wrapper{
+         display: inline-block;
+         width: 50%;
+         line-height: 1;
+         }
+         .table-wrapper{
+         float: left;
+         }
+         .canvas-wrapper{
+         position: fixed;
+         margin-left: -180px;
+         }
+      </style>
+   </head>
+   <body class="fixed-header ">
+      <!-- START CONTAINER FLUID -->
+      <div class=" container-fluid   container-fixed-lg bg-white">
+      <!-- START card -->
+      <div class="card card-transparent">
+      <div class="card-header ">
+         <div style="float:left" class="card-title">Device Last Information
+         </div>
+      </div>
+      <div class="card-body">
+      {% if "Dixell" in provider[0][6] %}
+      <h5>Timestamp: {{device[1]}}</h5>
+      <h5>Device Id: {{device[2]}}</h5>
+      <h5>Name: {{device[3]}}</h5>
+      <h5>Address: {{device[4]}}</h5>
+      <h5>Model: {{device[5]}}</h5>
+      {% endif %}
+
+      {% if "Danfoss" in provider[0][6] %}
+      <h5>Timestamp: {{device[1]}}</h5>
+      <h5>Device Id: {{device[2]}}</h5>
+      <h5>Name: {{device[3]}}</h5>
+      <h5>Nodetype: {{device[4]}}</h5>
+      <h5>Node: {{device[5]}}</h5>
+      {% endif %}
+
+      {% if "RDM" in provider[0][6] %}
+      <h5>Timestamp: {{device[1]}}</h5>
+      <h5>Name: {{device[2]}}</h5>
+      <h5>State: {{device[3]}}</h5>
+      {% endif %}
+
+      {% if "Cool Expert" in provider[0][6] %}
+      <h5>Timestamp: {{device[1]}}</h5>
+      <h5>Device Id: {{device[2]}}</h5>
+      <h5>Name: {{device[3]}}</h5>
+      {% endif %}
+
+      <h5>Provider: {{provider[0][6]}}</h5>
+         <div class="table-responsive">
+            <div class="table-wrapper">
+               <div class="col-xs-12">
+                  <input type="text" id="search-table" class="form-control pull-right" placeholder="Search">
+               </div>
+               <table class="table table-hover demo-table-search table-responsive-block" id="tableWithSearch">
+                  <thead>
+                     <tr>
+                        <!-- NOTE * : Inline Style Width For Table Cell is Required as it may differ from user to user
+                           Comman Practice Followed
+                           -->
+                        <th style="width:1%" class="text-center"></th>
+                        <th style="width:20%">Property</th>
+                        <th style="width:20%">Value</th>
+                        <th style="width:29%">Write</th>
+                        <th style="width:15%">Send</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                  {% set start_from_here = 0 %}
+                  {% if "Dixell" in provider[0][6] %}
+                  {% set start_from_here = 5 %}
+                 {% endif %}
+                  {% if "Danfoss" in provider[0][6] %}
+                  {% set start_from_here = 5 %}
+                 {% endif %}
+                  {% if "RDM" in provider[0][6] %}
+                  {% set start_from_here = 3 %}
+                 {% endif %}
+                  {% if "Cool Expert" in provider[0][6] %}
+                  {% set start_from_here = 3 %}
+                 {% endif %}
+
+                     {% for t in titles %}
+                     {% if loop.index > start_from_here and loop.index < titles|length %}
+                     {% set string_title = "\'" + titles[loop.index] + "\'" %}
+                     {% if device[loop.index] is not none %}
+                     <tr>
+                        <td class="v-align-middle">
+                           <div class="checkbox text-center">
+                              <input type="checkbox" value="3" id="{{titles[loop.index]}}">
+                              <label for="{{titles[loop.index]}}" class="no-padding no-margin"></label>
+                           </div>
+                        </td>
+                        {% if titles[loop.index].endswith(' W') or titles[loop.index].endswith(' R') %}
+                        <td class="label v-align-middle" style="cursor: pointer">{{titles[loop.index][:-2]}}</td>
+                        {% else %}
+                        <td class="label v-align-middle" style="cursor: pointer">{{titles[loop.index]}}</td>
+                        {% endif %}
+                        <td class="v-align-middle">{{device[loop.index]}}</td>
+                        {% if titles[loop.index].endswith(' W') %}
+                        <td class="v-align-middle"><input type="text"></input></td>
+                        <td class="v-align-middle"><input type="button" value="Send"></input></td>
+                        {% else %}
+                        <td class="v-align-middle"><input type="text" disabled></input></td>
+                        <td class="v-align-middle"><input type="button" value="Send" disabled></input></td>
+                        {% endif %}
+                     </tr>
+                     {% endif %}
+                     {% endif %}
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+            <div class="canvas-wrapper">
+               <canvas style="margin: inherit" id="myChart"></canvas>
+               <div>
+               </div>
+            </div>
+         </div>
+         <!-- END card -->
+      </div>
+      <!-- END CONTAINER FLUID -->
+      <script>
+      Array.prototype.remove = function() {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
+      function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+      function hasNumber(myString) {
+  return !/\D/.test(myString);
+}
+
+         var first_q = 1;
+            let myChart = document.getElementById('myChart').getContext('2d');
+         
+            // Fix all_timestamps
+
+            var all_timestamps = {{all_timestamps | safe }};
+            /*
+            for (i = 0; i < all_timestamps.length; i++){
+               if (i % 2 == 0){
+                  all_timestamps.remove(all_timestamps[i]);
+                  console.log(all_timestamps[i]); 
+               }
+              
+            };
+            */
+            let dataChart = new Chart(myChart, {
+                type: 'line', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
+                data:{
+                    labels: all_timestamps,
+                    datasets:[{
+                    label: 'Id of Checking',
+                    data: getAllValues('Id'),
+                }]
+                },
+                options:{tooltips: {
+					mode: 'index',
+					intersect: false,
+				}}
+            }); 
+
+            
+            function getAllValues(label){
+            var arrayOfValues = [];
+            let allData = {{ all_data | safe }};
+            console.log(allData)
+            Object.keys(allData).forEach(function(key) {
+            console.log("key: " + key + " label: " + label + " value: " + allData[key][label]);
+            arrayOfValues.push(allData[key][label]);
+            });
+            console.log("array of values:" + arrayOfValues);
+            return arrayOfValues;
+            };
+            
+            
+            function updateChart(newLabel, newData){
+               var color = getRandomColor();
+
+            if (newLabel.slice(-2) == " W" || newLabel.slice(-2) == " R"){
+               newLabel = newLabel.slice(0, -2);
+            };
+              var newDataset = {
+               label: newLabel,
+               data: newData,
+               fill: false,
+               backgroundColor: color,
+               borderColor: color
+            }
+            var test = String(newData)
+            test = test.split(",").join("")
+            test = test.split(".").join("")
+            test = test.split("-").join("")
+            
+             if (hasNumber(test) == false || test.length <= 0){
+                  alert("Sorry, no numeral info was found for this attribute. Please choose another one.");
+              }
+              else
+              {
+               console.log("the data set is: " + newDataset);
+               dataChart.data.datasets.push(newDataset);
+               console.log(dataChart.data);
+               dataChart.update();
+              }
+
+            };
+            
+            $(':checkbox').change(function () {
+               if (first_q == 1){
+                  first_q = 0;
+                  dataChart.data.datasets.pop();
+                  dataChart.update();
+               };
+            var label = $(this).attr('id');
+             if($(this).is(':checked')){
+               console.log("Adding value");
+               updateChart(label, getAllValues(label));
+             }
+             else{
+               console.log("Removing value");
+
+               if (label.slice(-2) == " W" || label.slice(-2) == " R"){
+                  label = label.slice(0, -2);
+               };
+
+               // Filter out and set back into chart.data.datasets
+               dataChart.data.datasets = dataChart.data.datasets.filter(function(obj) {
+                  return (obj.label != label); 
+               });
+               // Repaint
+               dataChart.update();            
+             }
+            });
+            
+            
+            function clearAndAddNewDataSets(newLabel, newData) {
+            dataChart.config.data.datasets = [];
+            
+
+            for (i = 0; i < newData.length; i++) {
+            var dataSet = {
+            label: newLabel,
+            data: newData,
+            }
+            
+            dataChart.config.data.datasets.push(dataSet);    
+            }
+            
+            dataChart.update();
+            
+            }
+            
+            
+      </script>
+   </body>
+</html>
+{% endblock %}

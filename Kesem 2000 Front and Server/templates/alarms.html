@@ -1,0 +1,84 @@
+{% extends "layouts.html" %}
+{% block body %}
+<!DOCTYPE html>
+<html>
+   <head>
+      <style>
+         .container{
+         float: left;
+         }
+         .table-wrapper , .canvas-wrapper{
+         display: inline-block;
+         width: 100%;
+         line-height: 1;
+         }
+         .table-wrapper{
+         float: left;
+         }
+      </style>
+   </head>
+   <body class="fixed-header " onload="init()">
+      <!-- START CONTAINER FLUID -->
+      <div class=" container-fluid   container-fixed-lg bg-white">
+      <!-- START card -->
+      <div class="card card-transparent">
+      <div class="card-header ">
+         <div style="float:left" class="card-title">All Alarms
+         </div>
+      </div>
+         <div class="table-responsive">
+            <div class="table-wrapper">
+               <div class="col-xs-12">
+                  <input type="text" id="search-table" class="form-control pull-right" placeholder="Search">
+               </div>
+               <table class="table table-hover demo-table-search table-responsive-block" id="tableWithSearch">
+                  <thead>
+                     <tr>
+                        <!-- NOTE * : Inline Style Width For Table Cell is Required as it may differ from user to user
+                           Comman Practice Followed
+                           -->
+                        <th>Customer</th>
+                        <th>Device</th>
+                        <th>Alarm</th>
+                        <th id="timestamp">Timestamp</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                            {% for alarm in alarms %}
+                        {% for customer in alarm %}
+                     {% for a in alarm[customer] %}
+                    <tr style="color:{{a[3]}}">
+                    <td class="label v-align-middle" style="cursor: pointer; color:{{a[3]}}">{{customer}}</td>
+                    <td class="label v-align-middle" style="cursor: pointer; color:{{a[3]}}">{{ a[0] }}</td>
+                    <td class="label v-align-middle" style="cursor: pointer; color:{{a[3]}}">{{ a[1] }}</td>
+                    <td class="label v-align-middle" style="cursor: pointer; color:{{a[3]}}">{{ a[2] }}</td> 
+                    </tr>
+                {% endfor %}
+                  {% endfor %}
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+   </body>
+   <script>
+
+
+
+function eventFire(el, etype){
+  if (el.fireEvent) {
+    el.fireEvent('on' + etype);
+  } else {
+    var evObj = document.createEvent('Events');
+    evObj.initEvent(etype, true, false);
+    el.dispatchEvent(evObj);
+  }
+}
+
+function init(){
+   eventFire(document.getElementById('timestamp'), 'click');
+   eventFire(document.getElementById('timestamp'), 'click');
+}
+
+   </script>
+</html>
+{% endblock %}

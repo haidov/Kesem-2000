@@ -1,0 +1,105 @@
+{% extends "layouts.html" %}
+{% block body %}
+<html>
+<head>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+tr:hover{
+  background-color: #ffddff;
+}
+
+.container{
+    vertical-align: top;
+}
+.table-wrapper , .canvas-wrapper{
+    display: inline-block;
+    width: 50%;
+    line-height: 1;
+    vertical-align: top;
+    float: left;
+}
+
+.canvas-wrapper{
+  position: fixed;
+}
+
+</style>
+</head>
+<body>
+
+
+<div class="table-wrapper">
+  <table>
+    {% for t in titles %}
+    {% if loop.index < titles|length %}
+    {% set string_title = "\'" + titles[loop.index] + "\'" %}
+    {% if device[loop.index] is not none %}<tr><td class="label" style="cursor: pointer">{{titles[loop.index]}}</td> <td>{{device[loop.index]}}</td>{% if titles[loop.index].endswith(' W') %}<td><input type="text"></input></td><td><input type="button" value="Send"></input></td>{% endif %}</tr>{% endif %}
+    
+    {% endif %}
+    {% endfor %}
+  </table>
+</div>
+<div class="canvas-wrapper">
+  <canvas id="myChart"></canvas>
+<div>
+    <script>
+    let myChart = document.getElementById('myChart').getContext('2d');
+
+    let dataChart = new Chart(myChart, {
+        type: 'line', // bar, horizontalBar, pie, line, doughnut, radar, polarArea
+        data:{
+            labels: {{all_timestamps | safe }},
+            datasets:[{
+            label: 'Id',
+            data: getAllValues('Id')
+        }]
+        },
+        options:{}
+    }); 
+
+  function getAllValues(label){
+    var arrayOfValues = []
+    let allData = {{ all_data | safe }}
+    Object.keys(allData).forEach(function(key) {
+    console.log(key, allData[key][label]);
+    arrayOfValues.push(allData[key][label])
+});
+    console.log(arrayOfValues)
+    return arrayOfValues;
+};
+
+function updateChart(newLabel, newData){
+  dataChart.data.datasets[0].label = newLabel;
+  dataChart.data.datasets[0].data = newData;
+  dataChart.update();
+};
+
+$('.label').click(function () {
+    var label = $(this).html();   
+    console.log(label);
+    updateChart(label, getAllValues(label))
+});
+
+
+
+
+</script>
+</body>
+
+</html>
+{% endblock %}

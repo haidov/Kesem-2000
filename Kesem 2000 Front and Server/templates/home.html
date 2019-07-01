@@ -1,0 +1,219 @@
+{% extends 'layouts.html' %}
+{% block body %}
+<style>
+.btn-sm{
+   
+    font-size: 10px !important;
+}
+</style>
+<body>
+   <div id="container"></div>
+   <h2>Dashboard <small> Welcome {{session.username}}</small> </h2>
+   <hr>
+
+   <div class="card-body sortable">
+      <div class="row">
+         <div class="col-lg-6 sortable-column">
+         
+            {% for customer in all_data %}
+            {% if loop.index0 == 2 %}
+         </div>
+         <div class="col-lg-6 sortable-column">
+            {% endif %}
+            {% set n_of_alarms = [] %}
+            
+            {% if customer[0]["provider"] == "Cool Expert" %}
+            
+            {% for d in customer[1] %}
+            {% if d['Nvoalarmrelay'] == '0' %}  {% if n_of_alarms.append('1') %}{% endif %} {% endif %} 
+            {% endfor %}
+            {% endif %}
+
+            {% if customer[0]["provider"] == "Danfoss" %}
+            {% for d in customer[1] %}
+            {% if d['Alarm'] != '0' %} {% if n_of_alarms.append('1') %}{% endif %} {% endif %} 
+            {% endfor %}
+            {% endif %}
+
+            {% if customer[0]["provider"] == "Dixell" %}
+            {% for d in customer[1] %}
+            {% if d['Alarm'] != '0' %} {% if n_of_alarms.append('1') %}{% endif %} {% endif %} 
+            {% endfor %}
+            {% endif %}
+
+            {% if customer[0]["provider"] == "RDM" %}
+            {% for d in customer[1] %}
+            {% if d['State'] == "Alarm" %} {% if n_of_alarms.append('1') %}{% endif %} {% endif %} 
+            {% endfor %}
+            {% endif %}
+
+            <div class="card card-default bg-dark" data-pages="card" style = "width:100%;">
+               <div class="card-header" >
+                  <div class="card-title" style="color: red; margin: 11px"><i class="fas fa-bell"></i>{{n_of_alarms|length}}
+                  </div>
+                  <div class="card-title" style="color: white">Name: {{customer[0]["name"]}}
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                      <label class="btn btn-secondary active">
+                        <input type="radio" name="options" autocomplete="off" onchange="hideShow('diagram{{loop.index0}}', 'cards{{loop.index0}}')" checked>Devices Mode
+                      </label>
+                      <label class="btn btn-secondary">
+                        <input type="radio" name="options" onchange="hideShow('cards{{loop.index0}}', 'diagram{{loop.index0}}')" autocomplete="off">Diagram Mode
+                      </label>
+                    </div>
+                  </div>
+                  <iframe id="diagram{{loop.index0}}" name="iframe{{loop.index0}}" src="/{{customer[0]['name']}}/diagram/" style="display:none; width:100%; height:500px;"></iframe>
+                  <div class="card-controls">
+                     <ul>
+                        <li><a href="#" class="card-collapse" data-toggle="collapse"><i
+                           class="card-icon card-icon-collapse" style="color: white"></i></a>
+                        </li>
+                        <li><a href="#" class="card-close" data-toggle="close"><i
+                           class="card-icon card-icon-close" style="color: white"></i></a>
+                        </li>
+                     </ul>
+                  </div>
+               </div>
+               <div class="card-body test" id="cards{{loop.index0}}">
+                  {% if customer[0]["provider"] == "Cool Expert" %}
+                  {% for d in customer[1] %}
+                  {% if loop.index0 % 3 == 0 %}
+                  <div class="row">
+                     {% endif %}
+                     <div class="col-lg-4">
+                        <a href="{{customer[0]['name']}}/device/{{d['Name']}}">
+                        <button class="btn-sm m-t-10 btn-block {% if d['nvoStandby'] != '0' %} btn btn-success" {% endif %} 
+                        {% if d['Nvoalarmrelay'] == '0' %} btn btn-warning" {% endif %} 
+                        {% if d['nvoStandby'] != '0' %} btn btn-default" {% endif %} 
+                        {% if d['Nvocool'] != '0' %} btn btn-complete" {% endif %} 
+                        {% if d['Nvodefroststate'] != '0' %} btn btn-danger" {% endif %} 
+                        data-toggle="tooltip" data-placement="top" title="Set: {{d['Nvothermostsetpt']}}">
+                        {{d['Name']}}  TMP: {{d['Nvoairtemp']}}
+                     </div>
+                     </a>
+                     </button>
+                     {% if loop.index0 % 3 == 2 or loop.last %}
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+                  {% if customer[0]["provider"] == "Danfoss" %}
+                  {% for d in customer[1] %}
+                  {% if loop.index0 % 3 == 0 %}
+                  <div class="row">
+                     {% endif %}
+                     <div class="col-lg-4">
+                        <a href="{{customer[0]['name']}}/device/{{d['Name']}}">
+                        <button class="btn-sm m-t-10 btn-block {% if d['Alarm'] != '0' %} btn btn-danger" {% endif %} 
+                        {% if d['Def Start'] == '0' %} btn btn-warning" {% endif %} 
+                        {% if d['Online'] == '1' %} btn btn-success" {% endif %} 
+                        {% if d['Online'] == '0' %} btn btn-default" {% endif %} 
+                        data-toggle="tooltip" data-placement="top" title="Set: {{d['Cutout Cid 0 Vid 100 W']}}">
+                        {{d['Name']}}  TMP: {{d[695]}}
+                     </div>
+                     </a>                
+                     </button>
+                     {% if loop.index0 % 3 == 2 or loop.last %}
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+                  {% if customer[0]["provider"] == "Dixell" %}
+                  {% for d in customer[1] %}
+                  {% if loop.index0 % 3 == 0 %}
+                  <div class="row">
+                     {% endif %}
+                     <div class="col-lg-4">
+                        <a href="{{customer[0]['name']}}/device/{{d['Name']}}">
+                        <button class="btn-sm m-t-10 btn-block {% if d['Alarm'] != '0' %} btn btn-danger"{% endif %} 
+                        {% if d['Defrost R'] == 1 %} btn btn-warning" {% endif %} 
+                        {% if d['No Link R'] == 1 %} btn btn-default" {% endif %} 
+                        {% if d['On R'] == 1 and d['Cooling R'] == 1 %} btn btn-complete" {% endif %} 
+                        {% if d['On R'] == 0 and d['Cooling R'] == 1 %} btn btn-success" {% endif %} 
+                        {% if d['On R'] == 1 %} btn btn-success" {% endif %} 
+                        data-toggle="tooltip" data-placement="top" title="Set: {{d['Setpoint W']}}">
+                        {{d['Name']}}  TMP: {{d['Probe 1 R']}}
+                     </div>
+                     </a>
+                     </button>
+                     {% if loop.index0 % 3 == 2 or loop.last %}
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+                  {% if customer[0]["provider"] == "RDM" %}
+                  {% for d in customer[1] %}
+                  {% if loop.index0 % 3 == 0 %}
+                  <div class="row">
+                     {% endif %}
+                     
+                     <div class="col-lg-4">
+                        <a href="{{customer[0]['name']}}/device/{{d['Name']}}">
+                        <button class="btn-sm m-t-10  btn-block {% if d['State'] == 'Normal' %} btn btn-success" {% endif %} 
+                        {% if d['State'] == "Alarm" %} btn btn-danger" {% endif %} 
+                        {% if d['State'] == "Defrost" %} btn btn-warning" {% endif %} 
+                        {% if d['State'] == "Offline" %} btn btn-default" {% endif %} 
+                        data-toggle="tooltip" data-placement="top" title="Set: {{d['Control Temp R']}}">
+                        {{d['Name']}}  TMP: {{d['Control Temp R']}}
+                     </div>
+                     </a>
+                     </button>
+                     {% if loop.index0 % 3 == 2 or loop.last %}
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+               </div>
+            </div>
+            <!-- END CONTAINER FLUID -->
+            {% endfor %}
+         </div>
+      </div>
+   </div>
+   </body>
+   <script>
+      function hideShow(toHide, toShow)
+      {
+          document.getElementById(toHide).style.display = "none";
+          document.getElementById(toShow).style.display = "block";
+      }
+     /* function decode(decode_this) {
+      return decodeURIComponent(decode_this.replace(/\+/g, " "));
+      }
+      
+      function decodeOnce(){
+            $("button").each(function() {
+                $(this).text(decode($(this).text()));
+            });
+      };
+      */
+      
+      function reload() {
+          $.ajax("/").done(function(reply) {
+             console.log(reply);
+              $("body").html(reply);
+          //    $("button").each(function() {
+          //        $(this).text(decode($(this).text()));
+          //    });
+          });
+      }
+      setTimeout(reload, 22222222);
+      $().button('toggle')	
+      /*
+      number_of_alarms = 0
+       $("button").each(function(){
+         if($(this).attr("class")=="btn-sm m-t-10 btn-block  btn btn-danger") {
+           number_of_alarms++;
+           console.log(number_of_alarms);
+          $("#number_of_alarms").text(number_of_alarms);
+         }
+        });
+      */
+
+      var elements =  $("#1-test" ).children()
+
+$(".test").each(function(index) {
+  //console.log( index + ": " + $(this).text());
+});
+   </script> 
+</body>
+{% endblock %}

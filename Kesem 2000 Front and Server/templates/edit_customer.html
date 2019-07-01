@@ -1,0 +1,107 @@
+{% extends 'layouts.html' %}
+{% block body %}
+<head>
+   <style>
+      #edit_customer{
+      display: none;
+      }
+   </style>
+</head>
+<h1>Edit Customer</h1>
+{% from "includes/_formhelpers.html" import render_field %}
+<center>
+   <form id="choose_customer_to_edit" action="" method="POST">
+      <h2> Please select a customer: </h2>
+      <select name="customer_to_edit" id="customer_to_edit">
+         <option value="Please choose one: ">Please choose one...</option>
+         {% for customer in customers %}
+         <option value="{{customer[1]}}">{{customer[1]}}</option>
+         {% endfor %}
+      </select>
+   </form>
+   <form id="edit_customer" method="POST" action="">
+      <div class="form-group col-lg-4">
+         {{render_field(form.name, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.ip, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.port, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.username, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.password, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.provider, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.phone, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.email, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.address, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.contact_name, class="form-control")}}
+      </div>
+      <div class="form-group col-lg-4">
+         {{render_field(form.view_mode, class="form-control")}}
+      </div>
+      <p><input id="change_customer_btn" type="submit" class="btn btn-primary" value="Submit"></p>
+   </form>
+</center>
+<script>
+// In your Javascript (external .js resource or <script> tag)
+
+   $(document).ready(function() {
+      $('#customer_to_edit').select2({width: "40%"});
+   });
+
+   $( "#customer_to_edit" ).change(function() {
+       if ($("#customer_to_edit").val() != "Please choose one: ")
+       {
+        $("#edit_customer").show();
+        $.ajax({
+            url: "/edit_customer_chosen",
+            type: 'post',
+            data: $('#choose_customer_to_edit').serialize(),
+            success: function (response) {
+                console.log(response);
+                response = response["info_for_edit"][0];
+                response.pop();
+                response.push("Submit");
+                console.log(response);
+                var elements = document.getElementById("edit_customer").elements;
+
+                    for (var i = 0, element; element = elements[i++];) {
+                        element.value = response[i];
+                    }
+            }
+            });
+       }
+       else
+       {
+           $("#edit_customer").hide();
+       }
+   });
+
+
+         $(function () {
+      $('#edit_customer').on('submit',function (e) {
+                $.ajax({
+                    url: "/submit_the_edited",
+                    type: 'post',
+                  data: $('#edit_customer').serialize(),
+                  success: function (response) {
+                   console.log(response);
+                  }
+                });
+          });
+      });</script>
+{% endblock %}

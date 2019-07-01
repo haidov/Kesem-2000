@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    <script src="{{url_for('static', filename='jquery-3.2.1.min.js')}}"></script>
+
+    <script src="{{url_for('static', filename='summernote.min.js')}}"></script>
+
+    <script src="{{url_for('static', filename='moment.min.js')}}"></script>
+
+    <script src="{{url_for('static', filename='typeahead.bundle.min.js')}}"></script>
+    <script src="{{url_for('static', filename='typeahead.jquery.min.js')}}"></script>
+
+  <script src="{{url_for('static', filename='bootstrap3-typeahead.js')}}"></script>
+
+
+    <script src="{{url_for('static', filename='jquery.validate.min.js')}}"></script>      
+    <script src="{{url_for('static', filename='jquery.bootstrap.wizard.min.js')}}"></script>      
+    <script src="{{url_for('static', filename='jquery.inputmask.min.js')}}"></script>       
+    <script src="{{url_for('static', filename='bootstrap-tagsinput.min.js')}}"></script>
+    <script src="{{url_for('static', filename='dropzone.min.js')}}"></script>
+              <script src="{{url_for('static', filename='bootstrap3-wysihtml5.all.min.js')}}"></script>
+      <script src="{{url_for('static', filename='autoNumeric.js')}}"></script>
+          <script src="{{url_for('static', filename='dygraph.js')}}"></script>
+<script src="{{url_for('static', filename='switchery.min.js')}}"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+  <script src="{{url_for('static', filename='chartjs-plugin-zoom@0.7.0.js')}}"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+        <meta charset="utf-8">
+        <title>Kesem 2000</title>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css">
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script> 
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+            <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+              <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+      <link rel="stylesheet" href="{{ url_for('static', filename='dygraph.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='pace-theme-flash.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='jquery.scrollbar.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='select2.min.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='switchery.min.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='dataTables.bootstrap.min.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='dataTables.fixedColumns.min.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='datatables.responsive.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='pages-icons.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='pages.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap3-wysihtml5.min.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='datepicker3.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='summernote.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='daterangepicker-bs3.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-timepicker.min.css') }}">
+      <link class="main-stylesheet" rel="stylesheet" type="text/css" href="{{ url_for('static', filename='corporate.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+<script>
+    moment().format();
+</script>
+
+      <link type="image/svg+xml" rel="stylesheet" href="{{url_for('static', filename='Pages-icon.svg')}}"/> 
+       <link type="image/svg+xml" rel="stylesheet" href="{{url_for('static', filename='progress-bar-success.svg')}}"/> 
+
+        <style>
+        * {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Float four columns side by side */
+.column {
+  float: left;
+  width: 25%;
+  padding: 0 10px;
+}
+
+/* Remove extra left and right margins, due to padding in columns */
+.row {margin: 0 -5px;}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Style the counter cards */
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
+  padding: 10px;
+  text-align: center;
+  background-color: #f1f1f1;
+  font-size: 10px;
+}
+
+/* Responsive columns - one column layout (vertical) on small screens */
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+    display: block;
+    margin-bottom: 20px;
+  }
+}
+        </style>
+        </head>
+    <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+    {% include "includes/_navbar.html" %}
+
+    {% include "includes/_messages.html" %}
+    {% block body %}
+    
+    
+    {% endblock %}
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+          <!-- BEGIN VENDOR JS -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='switchery.min.css') }}">
+      <script src="{{url_for('static', filename='pace.min.js')}}"></script>
+      <script src="{{url_for('static', filename='popper.min.js')}}"></script>
+      <script src="{{url_for('static', filename='bootstrap.min.js')}}"></script>
+      <script src="{{url_for('static', filename='modernizr.custom.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery-ui.min.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery-easy.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery.unveil.min.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery.ioslist.min.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery.actual.min.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery.scrollbar.min.js')}}"></script>
+      <script src="{{url_for('static', filename='select2.full.min.js')}}"></script>
+      <script src="{{url_for('static', filename='classie.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery.dataTables.min.js')}}"></script>
+      <script src="{{url_for('static', filename='dataTables.tableTools.min.js')}}"></script>
+      <script src="{{url_for('static', filename='dataTables.bootstrap.js')}}"></script>
+      <script src="{{url_for('static', filename='jquery-datatable-bootstrap.js')}}"></script>
+      <script src="{{url_for('static', filename='datatables.responsive.js')}}"></script>
+      <script src="{{url_for('static', filename='lodash.min.js')}}"></script>
+      <!-- END VENDOR JS -->
+      <!-- BEGIN CORE TEMPLATE JS -->
+      <!-- BEGIN CORE TEMPLATE JS -->
+      <script src="{{url_for('static', filename='pages.js')}}"></script>
+      <!-- END CORE TEMPLATE JS -->
+      <!-- BEGIN PAGE LEVEL JS -->
+      <script src="{{url_for('static', filename='scripts.js')}}"></script>
+      <script src="{{url_for('static', filename='card.js')}}"></script>
+      <!-- END PAGE LEVEL JS -->
+      <!-- END CORE TEMPLATE JS -->
+      <!-- BEGIN PAGE LEVEL JS -->
+      <script src="{{url_for('static', filename='tables.js')}}"></script>
+      <script src="{{url_for('static', filename='datatables.js')}}"></script>
+      <!-- END PAGE LEVEL JS -->
+      <script src="{{url_for('static', filename='bootstrap-datepicker.js')}}"></script>
+      <script src="{{url_for('static', filename='daterangepicker.js')}}"></script>
+      <script src="{{url_for('static', filename='bootstrap-timepicker.min.js')}}"></script>
+      <script src="{{url_for('static', filename='handlebars-v4.0.5.js')}}"></script>
+      <script src="{{url_for('static', filename='form_elements.js')}}"></script>
+      <script src="{{url_for('static', filename='date.js')}}"></script>
+        <script>
+    $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    </script>
+    </body>
+</html>
