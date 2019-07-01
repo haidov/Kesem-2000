@@ -1,0 +1,228 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import requests
+import xml.etree.ElementTree as ET
+import re
+import datetime
+import json
+import random
+import sqlite3
+import time
+import requests
+import os.path
+
+# picking up piece of string between separators
+# function using partition, like partition, but drops the separators
+def between(left,right,s):
+    before,_,a = s.partition(left)
+    a,_,after = a.partition(right)
+    return before,a,after
+
+def get_all_points():
+   all_points_labels = []
+   
+   url="http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService"
+   headers = {'Content-Type': 'text/xml'}
+   headers = {'SOAPAction': 'http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService=GetSlaveList'}
+   body = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.resourcedm.com/RDMServices/2012/06/18/">
+      <soapenv:Header/>
+      <soapenv:Body>
+         <ns:GetSlaveList/>
+      </soapenv:Body>
+   </soapenv:Envelope>"""
+
+   response = requests.post(url,data=body,headers=headers)
+
+   nice_response = str(response.content)
+   nice_response = nice_response.replace(r"\n", "")
+   nice_response = nice_response.replace("![CDATA", "")
+   nice_response = nice_response.replace("]]", "]")
+
+   all_devices = re.findall(r'<Name>(.*?)</Name>', nice_response)
+
+   for device in all_devices:
+      print("Getting points of device " + str(device))
+      try:
+         url="http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService"
+         headers = {'Content-Type': 'text/xml'}
+         headers = {'SOAPAction': 'http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService=GetSlave'}
+         body = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.resourcedm.com/RDMServices/2012/06/18/">
+                     <soapenv:Header/>
+                     <soapenv:Body>
+                        <ns:GetSlave>
+                           <ns:Controller>""" + device + """</ns:Controller>
+                        </ns:GetSlave>
+                     </soapenv:Body>
+                  </soapenv:Envelope>"""
+
+         response = requests.post(url,data=body,headers=headers)
+      
+         # Get all points
+         nice_response = str(response.content)
+         nice_response = nice_response.replace(r"\n", "")
+         nice_response = nice_response.replace("![CDATA", "")
+         nice_response = nice_response.replace("]]", "]")
+         
+         a = between("<Items>", "<Items>", nice_response)
+         b = re.findall('<Item>(.*?)</Item>', a[1])
+         for label in b:
+            l = re.search('<Name>(.+?)</Name>', label).group(1)
+            rw = re.search('<Class>(.+?)</Class>', label).group(1)
+            l = l.lower()
+            l = l.replace("<[", "")
+            l = l.replace("]>", "")
+            l = l.replace(".", "")
+            l = l.replace("/", "_")
+            l = l.replace("-", "_")
+            l = l.replace(" ", "_")
+            if rw == "Parameter":
+               l = l + "_W"
+            else:
+               l = l + "_R"
+            if l not in all_points_labels:
+               all_points_labels.append(l)
+      except:
+         print("Connection refused. Waiting 5 seconds.")
+         time.sleep(5)
+   return sorted(all_points_labels)
+
+def create_devices_table():
+   new_list_labels = []
+   conn = sqlite3.connect('osher_ad_tel_aviv_table.db')
+   c = conn.cursor()
+   c.execute('CREATE TABLE IF NOT EXISTS devices(id INTEGER PRIMARY KEY, timestamp TEXT, name TEXT, state TEXT, alarm TEXT)')
+   all_points_labels = get_all_points()
+   
+   for point in all_points_labels:
+      c.execute("ALTER TABLE devices ADD COLUMN '%s' 'INT'" % point)
+
+def check_temps():    
+   print("THE BEGINNING")
+
+   url="http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService"
+   headers = {'Content-Type': 'text/xml'}
+   headers = {'SOAPAction': 'http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService=GetSlaveList'}
+   body = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.resourcedm.com/RDMServices/2012/06/18/">
+      <soapenv:Header/>
+      <soapenv:Body>
+         <ns:GetSlaveList/>
+      </soapenv:Body>
+   </soapenv:Envelope>"""
+
+   response = requests.post(url,data=body,headers=headers)
+
+   nice_response = str(response.content)
+   nice_response = nice_response.replace(r"\n", "")
+   nice_response = nice_response.replace("![CDATA", "")
+   nice_response = nice_response.replace("]]", "]")
+
+   all_devices = re.findall(r'<Name>(.*?)</Name>', nice_response)
+   all_states = re.findall(r'<State>(.*?)</State>', nice_response)
+
+   i = -1
+   print("number of devices: ")
+   number_of_devices = len(all_devices)
+   print(number_of_devices)
+   conn = sqlite3.connect('customers.db')
+   c = conn.cursor()
+   customer_name = "Osher Ad Tel Aviv"
+   q = '''UPDATE customers SET number_of_devices = ''' + str(number_of_devices) + ''' WHERE name = \"''' + str(customer_name) + "\""
+   print(q)
+   c.execute(q)
+   conn.commit()
+
+   for device in all_devices:
+      time.sleep(5)
+      i = i + 1
+
+   # Get the alarms if state = alarm
+      alarm = "0"
+      if all_states[i] == "Alarm":
+         print("Getting alarms of device " + str(device) + " number: " + str(i))
+      
+         url="http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService"
+         headers = {'Content-Type': 'text/xml'}
+         headers = {'SOAPAction': 'http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService=GetAlarmList'}
+         body = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.resourcedm.com/RDMServices/2012/06/18/">
+         <soapenv:Header/>
+         <soapenv:Body>
+            <ns:GetAlarmList>
+            <ns:Number>1</ns:Number>
+         <ns:Controller>""" + device + """</ns:Controller>
+            </ns:GetAlarmList>
+         </soapenv:Body>
+      </soapenv:Envelope>"""
+
+         response = requests.post(url,data=body,headers=headers)
+
+         nice_response = response.content
+
+         print(nice_response)
+         alarm = "Error"
+         
+      print("Getting points of device " + str(device) + " number: " + str(i))
+      url="http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService"
+      headers = {'Content-Type': 'text/xml'}
+      headers = {'SOAPAction': 'http://212.29.254.24:18024/cgi-bin/cgi.cgi?WebService=GetSlave'}
+      body = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://www.resourcedm.com/RDMServices/2012/06/18/">
+                  <soapenv:Header/>
+                  <soapenv:Body>
+                     <ns:GetSlave>
+                        <ns:Controller>""" + device + """</ns:Controller>
+                     </ns:GetSlave>
+                  </soapenv:Body>
+               </soapenv:Envelope>"""
+
+      response = requests.post(url,data=body,headers=headers)
+      # Customized Insertation
+
+      nice_response = str(response.content)
+      nice_response = nice_response.replace(r"\n", "")
+      nice_response = nice_response.replace("![CDATA", "")
+      nice_response = nice_response.replace("]]", "]")
+      all_specific_points = {}
+
+      a = between("<Items>", "<Items>", nice_response)
+      b = re.findall('<Item>(.*?)</Item>', a[1])
+      for label in b:
+         n = re.search('<Name>(.+?)</Name>', label).group(1)
+         rw = re.search('<Class>(.+?)</Class>', label).group(1)
+         n = n.lower()
+         n = n.replace("<[", "")
+         n = n.replace("]>", "")
+         n = n.replace(".", "")
+         n = n.replace("/", "_")
+         n = n.replace("-", "_")
+         n = n.replace(" ", "_")
+         if rw == "Parameter":
+            n = n + "_W"
+         else:
+            n = n + "_R"
+
+         v = re.search('<Value>(.+?)</Value>', label).group(1)
+         v = v.replace("<[", "")
+         v = v.replace("]>", "")
+         all_specific_points.update({n : v})
+      unix = time.time()
+      date = str(datetime.datetime.fromtimestamp(unix).strftime('%d-%m-%Y %H:%M'))
+      shared_dict = {"timestamp": date, "name": all_devices[i], "state": all_states[i], "alarm": alarm}
+      merged_dict = {**shared_dict, **all_specific_points}
+      
+      conn = sqlite3.connect('osher_ad_tel_aviv_table.db')
+      c = conn.cursor()
+      columns = ', '.join(merged_dict.keys())
+      placeholders = ':'+', :'.join(merged_dict.keys())
+      query = 'INSERT INTO devices (%s) VALUES (%s)' % (columns, placeholders)
+      c.execute(query, merged_dict)
+      conn.commit()
+      print("New query inserted")
+
+
+# Get all points once
+
+print (os.path.isfile("osher_ad_tel_aviv_table.db"))
+if os.path.isfile("osher_ad_tel_aviv_table.db") == False:
+    create_devices_table()
+
+while True:
+      check_temps()

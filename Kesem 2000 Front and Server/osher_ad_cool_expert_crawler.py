@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import datetime
+import json
+import random
+import sqlite3
+import time
+import urllib
+from urllib.request import urlopen
+import os.path
+
+import requests
+from bs4 import BeautifulSoup
+from lxml import html
+from urllib.parse import unquote
+
+def get_all_points():
+    print("Getting all points...")
+    all_bits = []
+    all_points_labels = []
+    guid = 0
+    while True:
+        guid = guid + 1
+        try:
+            rs = requests.session()
+            url="http://212.29.254.24:18220/load.lp?url=static/login&cmd=login"
+            body = """username=gvk1010&password=1010&password=1e48c4420b7073bc11916c6c1de226bb""" # TODO: Hash Password
+            
+            rs.post(url, data=body)
+            url="http://212.29.254.24:18220/load.lp?&url=modules/site/getNodeInfo&guid=" + str(guid)
+
+            r = rs.post(url, data=body)
+            soap = BeautifulSoup(r.text, 'html.parser')
+
+            name = soap.find('input', class_='required minLength:1')
+            name = name['value']
+            print (name)
+
+            nid = soap.find('textarea')
+            nid = nid.text
+
+            url = """http://212.29.254.24:18220/request.lp?nid=""" + nid + """&update=nvoAirTemp,nvoBlockTemp,nvoThermostSetpt,nvoThermostSpRef,nvoStandby,nvoStandby.value,nvoStandby.state,nvoDefrostStart,nvoDefrostStart.value,nvoDefrostStart.state,nvoDefrostComm,nvoDefrostComm.value,nvoDefrostComm.state,nvoDefrostLock,nvoDefrostLock.value,nvoDefrostLock.state,nvoSetShift,nvoSetShift.value,nvoSetShift.state,nvoDoor,nvoDoor.value,nvoDoor.state,nvoCoolComm,nvoCoolComm.value,nvoCoolComm.state,nvoLoadControl,nvoLoadControl.value,nvoLoadControl.state,nvoAlarm,nvoAlarm.bit0,nvoAlarm.bit1,nvoAlarm.bit2,nvoAlarm.bit3,nvoAlarm.bit4,nvoAlarm.bit5,nvoAlarm.bit6,nvoAlarm.bit7,nvoAlarm.bit8,nvoAlarm.bit9,nvoAlarm.bit10,nvoAlarm.bit11,nvoAlarm.bit12,nvoAlarm.bit13,nvoAlarm.bit14,nvoAlarm.bit15,nvoStateDI1,nvoStateDI1.value,nvoStateDI1.state,nvoStateDI2,nvoStateDI2.value,nvoStateDI2.state,nvoHeater,nvoHeater.value,nvoHeater.state,nvoCool,nvoCool.value,nvoCool.state,nvoFan,nvoFan.value,nvoFan.state,nvoAlarmRelay,nvoAlarmRelay.value,nvoAlarmRelay.state,nvoIDVersion,nvoIDRelease,nvoFanSpeed,nvoDefrostState,nvoDefrostTime,nvoDefrostTime.day,nvoDefrostTime.hour,nvoDefrostTime.minute,nvoDefrostTime.second,nvoDefrostTime.millisecond,nviThermostSetpt,nviStandby,nviStandby.value,nviStandby.state,nviDefrostStart,nviDefrostStart.value,nviDefrostStart.state,nviDefrostLock,nviDefrostLock.value,nviDefrostLock.state,nvoAirTemp,nvoBlockTemp,nvoThermostSetpt,nvoThermostSpRef,nvoStandby,nvoDefrostStart,nvoDefrostComm,nvoDefrostLock,nvoSetShift,nvoDoor,nvoCoolComm,nvoLoadControl,nvoAlarm,nvoStateDI1,nvoStateDI2,nvoHeater,nvoCool,nvoFan,nvoAlarmRelay,nvoIDVersion,nvoIDRelease,nvoFanSpeed,nvoDefrostState,nvoDefrostTime,nviThermostSetpt,nviStandby,nviDefrostStart,nviDefrostComm,nviSetShift,nviDoor,nviCoolComm,nviDefrostLock,nviLoadControl,nviCommand&url=modules/mgr/device"""
+            r = rs.post(url, data=body)
+
+            json_object = json.loads(r.text)
+            for point in json_object["data"]:
+                if point[:2] == "__":
+                    continue
+                if point[:3] == "nvi":
+                    continue
+                if point == "nvoAlarm":
+                    value = json.dumps(json_object["data"][point])
+                    value = value.split()
+                    i = 0
+                    all_bits = []
+                    for bit in value:
+                        if i % 2 == 0:
+                            val = value[i]
+                            val = val.replace('"', '')
+                            val = val.replace(':', '')
+                            val = val.replace('{', '')
+                            all_bits.append("nvo_alarm_" + val)
+                        i = i + 1
+                        for bit in all_bits:
+                            if bit not in all_points_labels:
+                                all_points_labels.append(bit)
+
+                point = point.lower()
+                if point not in all_points_labels:
+                    all_points_labels.append(point)
+                    print("Point " + point + " Added.")
+        except:
+            conn = sqlite3.connect('customers.db')
+            c = conn.cursor()
+            customer_name = "Osher Ad Cool Expert"
+            q = '''UPDATE customers SET number_of_devices = ''' + str(guid) + ''' WHERE name = \'''' + str(customer_name) + "\'"
+            print(q)
+            c.execute(q)
+            conn.commit()
+            print(all_points_labels)
+            break
+    return all_points_labels
+
+
+def create_devices_table():
+
+    all_points = get_all_points()
+    conn = sqlite3.connect('osher_ad_cool_expert_table.db')
+    c = conn.cursor()
+    c.execute('CREATE TABLE IF NOT EXISTS devices(id INTEGER PRIMARY KEY, timestamp TEXT, device_id TEXT, name TEXT, nid TEXT, alarm TEXT)')
+    for point in all_points:
+        c.execute("ALTER TABLE devices ADD COLUMN '%s' 'INT'" % point)
+
+def check_temps():    
+    print("THE BEGINNING")
+    guid = 0
+    while True:
+        guid = guid + 1
+        try:
+            rs = requests.session()
+            url="http://212.29.254.24:18220/load.lp?url=static/login&cmd=login"
+            body = """username=gvk1010&password=1010&password=1e48c4420b7073bc11916c6c1de226bb"""
+            
+            rs.post(url, data=body)
+            url="http://212.29.254.24:18220/load.lp?&url=modules/site/getNodeInfo&guid=" + str(guid)
+
+            r = rs.post(url, data=body)
+            soap = BeautifulSoup(r.text, 'html.parser')
+
+            name = soap.find('input', class_='required minLength:1')
+            name = name['value']
+
+            nid = soap.find('textarea')
+            nid = nid.text
+
+            url = """http://212.29.254.24:18220/request.lp?nid=""" + nid + """&update=nvoAirTemp,nvoBlockTemp,nvoThermostSetpt,nvoThermostSpRef,nvoStandby,nvoStandby.value,nvoStandby.state,nvoDefrostStart,nvoDefrostStart.value,nvoDefrostStart.state,nvoDefrostComm,nvoDefrostComm.value,nvoDefrostComm.state,nvoDefrostLock,nvoDefrostLock.value,nvoDefrostLock.state,nvoSetShift,nvoSetShift.value,nvoSetShift.state,nvoDoor,nvoDoor.value,nvoDoor.state,nvoCoolComm,nvoCoolComm.value,nvoCoolComm.state,nvoLoadControl,nvoLoadControl.value,nvoLoadControl.state,nvoAlarm,nvoAlarm.bit0,nvoAlarm.bit1,nvoAlarm.bit2,nvoAlarm.bit3,nvoAlarm.bit4,nvoAlarm.bit5,nvoAlarm.bit6,nvoAlarm.bit7,nvoAlarm.bit8,nvoAlarm.bit9,nvoAlarm.bit10,nvoAlarm.bit11,nvoAlarm.bit12,nvoAlarm.bit13,nvoAlarm.bit14,nvoAlarm.bit15,nvoStateDI1,nvoStateDI1.value,nvoStateDI1.state,nvoStateDI2,nvoStateDI2.value,nvoStateDI2.state,nvoHeater,nvoHeater.value,nvoHeater.state,nvoCool,nvoCool.value,nvoCool.state,nvoFan,nvoFan.value,nvoFan.state,nvoAlarmRelay,nvoAlarmRelay.value,nvoAlarmRelay.state,nvoIDVersion,nvoIDRelease,nvoFanSpeed,nvoDefrostState,nvoDefrostTime,nvoDefrostTime.day,nvoDefrostTime.hour,nvoDefrostTime.minute,nvoDefrostTime.second,nvoDefrostTime.millisecond,nviThermostSetpt,nviStandby,nviStandby.value,nviStandby.state,nviDefrostStart,nviDefrostStart.value,nviDefrostStart.state,nviDefrostLock,nviDefrostLock.value,nviDefrostLock.state,nvoAirTemp,nvoBlockTemp,nvoThermostSetpt,nvoThermostSpRef,nvoStandby,nvoDefrostStart,nvoDefrostComm,nvoDefrostLock,nvoSetShift,nvoDoor,nvoCoolComm,nvoLoadControl,nvoAlarm,nvoStateDI1,nvoStateDI2,nvoHeater,nvoCool,nvoFan,nvoAlarmRelay,nvoIDVersion,nvoIDRelease,nvoFanSpeed,nvoDefrostState,nvoDefrostTime,nviThermostSetpt,nviStandby,nviDefrostStart,nviDefrostComm,nviSetShift,nviDoor,nviCoolComm,nviDefrostLock,nviLoadControl,nviCommand&url=modules/mgr/device"""
+            r = rs.post(url, data=body)
+            all_specific_points = {}
+            fixed_json_object = []
+            json_object = json.loads(r.text)
+            if json_object["data"]:
+                for point in json_object["data"].keys():
+                    if point[:2] == "__":
+                        continue
+                    if point[:3] == "nvi":
+                        continue
+                    fixed_json_object.append(point)
+                for point in fixed_json_object:
+                    value = json.dumps(json_object["data"][point])
+                    value = value.replace("\"", "")
+                    value = value.replace("}", "")
+                    value = value.replace("{", "")
+                    if "state" in value:
+                        value = value[-1:]
+
+
+                    all_specific_points.update({str(point).lower() : value})
+                    for bit in all_points:
+                        if bit[:9] == "nvo_alarm":
+                            all_specific_points.update({bit : 0})
+                unix = time.time()
+                date = str(datetime.datetime.fromtimestamp(unix).strftime('%d-%m-%Y %H:%M'))
+
+                shared_dict = {"timestamp": date, "device_id": guid, "name": name, "nid": nid, "alarm": 0}
+                merged_dict = {**shared_dict, **all_specific_points}
+                
+                conn = sqlite3.connect('osher_ad_cool_expert_table.db')
+                c = conn.cursor()
+                columns = ', '.join(merged_dict.keys())
+                placeholders = ':'+', :'.join(merged_dict.keys())
+                query = 'INSERT INTO devices (%s) VALUES (%s)' % (columns, placeholders)
+                c.execute(query, merged_dict)
+                conn.commit()
+                print("New query inserted")
+                print(guid)
+        except:
+            conn = sqlite3.connect('customers.db')
+            c = conn.cursor()
+            customer_name = "Osher Ad Cool Expert"
+            q = '''UPDATE customers SET number_of_devices = ''' + str(guid) + ''' WHERE name = \'''' + str(customer_name) + "\'"
+            print(q)
+            c.execute(q)
+            conn.commit()
+            break
+    print("FINISHED")
+
+print (os.path.isfile("osher_ad_cool_expert_table.db"))
+if os.path.isfile("osher_ad_cool_expert_table.db") == False:
+    create_devices_table()
+
+conn = sqlite3.connect('osher_ad_cool_expert_table.db')
+c = conn.cursor()
+
+all_points = get_all_points()
+
+# Get all points once
+while True:
+    try:
+        check_temps()
+    except:
+        print("Connection refused. Waiting 30 seconds.")
+        time.sleep(30)
+        pass
