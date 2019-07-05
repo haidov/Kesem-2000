@@ -49,29 +49,26 @@
 
             <div class="card card-default bg-dark" data-pages="card" style = "width:100%;">
                <div class="card-header" >
+                                     <div class="card-controls" style="margin-left:40px">
+                    <a href="#" id="collapse{{loop.index0}}" class="card-collapse" data-toggle="collapse"><i
+                           class="card-icon card-icon-collapse" style="color: white"></i>
+                     <a href="#" class="card-close" data-toggle="close"><i
+                           class="card-icon card-icon-close" style="color: white"></i></a>
+                    </div>
+
                   <div class="card-title" style="color: red; margin: 11px"><i class="fas fa-bell"></i>{{n_of_alarms|length}}
                   </div>
                   <div class="card-title" style="color: white">Name: {{customer[0]["name"]}}
                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
                       <label class="btn btn-secondary active">
-                        <input type="radio" name="options" autocomplete="off" onchange="hideShow('diagram{{loop.index0}}', 'cards{{loop.index0}}')" checked>Devices Mode
+                        <input type="radio" name="options" autocomplete="off" onchange="hideShow('diagram{{loop.index0}}', 'cards{{loop.index0}}', 'collapse{{loop.index0}}')" checked>Devices Mode
                       </label>
                       <label class="btn btn-secondary">
-                        <input type="radio" name="options" onchange="hideShow('cards{{loop.index0}}', 'diagram{{loop.index0}}')" autocomplete="off">Diagram Mode
+                        <input type="radio" name="options" onchange="hideShow('cards{{loop.index0}}', 'diagram{{loop.index0}}', 'collapse{{loop.index0}}')" autocomplete="off">Diagram Mode
                       </label>
                     </div>
                   </div>
                   <iframe id="diagram{{loop.index0}}" name="iframe{{loop.index0}}" src="/{{customer[0]['name']}}/diagram/" style="display:none; width:100%; height:500px;"></iframe>
-                  <div class="card-controls">
-                     <ul>
-                        <li><a href="#" class="card-collapse" data-toggle="collapse"><i
-                           class="card-icon card-icon-collapse" style="color: white"></i></a>
-                        </li>
-                        <li><a href="#" class="card-close" data-toggle="close"><i
-                           class="card-icon card-icon-close" style="color: white"></i></a>
-                        </li>
-                     </ul>
-                  </div>
                </div>
                <div class="card-body test" id="cards{{loop.index0}}">
                   {% if customer[0]["provider"] == "Cool Expert" %}
@@ -171,10 +168,14 @@
    </div>
    </body>
    <script>
-      function hideShow(toHide, toShow)
+      function hideShow(toHide, toShow, collapse)
       {
           document.getElementById(toHide).style.display = "none";
           document.getElementById(toShow).style.display = "block";
+          if (toShow.includes("diagram"))
+             document.getElementById(collapse).style.visibility = "hidden";
+          else
+             document.getElementById(collapse).style.visibility = "visible";
       }
      /* function decode(decode_this) {
       return decodeURIComponent(decode_this.replace(/\+/g, " "));
