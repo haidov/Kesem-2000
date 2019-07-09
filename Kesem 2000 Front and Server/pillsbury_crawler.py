@@ -143,7 +143,7 @@ def check_temps():
                 nice_response = response.content
                 tree = ElementTree.fromstring(nice_response)
                 alarm = tree.find('active/ref').attrib['name']
-                print("name: " + name + " alarm:" + alarm)
+                print("name: " + name + " alarm: " + alarm)
         
                 this_round_alarms.update({name : alarm})
                 print(this_round_alarms)
@@ -159,6 +159,7 @@ def check_temps():
             all_parms = re.findall(r'<parm(.*?)</parm>', str(nice_response))
             # Search for specific points
 
+            body = """xml=<cmd action="read_val">"""
             for parm in all_parms:
                 time.sleep(0.1)
                 point = re.search(r'name=\"(.*?)\"', str(parm))
@@ -185,19 +186,25 @@ def check_temps():
                 point = point.replace("=", "")
                 point = "_" + point
                 if point not in all_points:
-                    url="http://84.228.13.207:1234/html/xml.cgi?"
-                    body = """xml=<cmd action="read_val">
+                    all_points.append(point)
+                    body = body +  """<val nodetype="16" node= \"""" + node + """\"cid=\"""" + cid + """\"vid=\"""" + vid + """\" />"""
+                    
 
-                    <val nodetype="16" node= \"""" + node + """\"cid=\"""" + cid + """\"vid=\"""" + vid + """\" />
-                    </cmd>"""
-                    response = requests.post(url,data=body)
-                    nice_response = response.content
-                    print(nice_response)
-                    tree = ElementTree.fromstring(nice_response)
-                    value = tree.find('val').attrib['parval']
+            url="http://84.228.13.207:1234/html/xml.cgi?"
+            body = body +  """</cmd>"""
 
-                    print("Point: " + point + " with value: " + value)
-                    all_specific_points.update({point : value})
+            response = requests.post(url,data=body)
+            nice_response = response.content
+            tree = ElementTree.fromstring(nice_response)
+            values = tree.findall('val')
+            i = -1
+
+            print(nice_response)
+
+            for value in values:
+                i = i + 1
+                print("Point: " + all_points[i] + " with value: " + value.get("parval"))
+                all_specific_points.update({all_points[i] : value.get("parval")})
 
             unix = time.time()
             date = str(datetime.datetime.fromtimestamp(unix).strftime('%d-%m-%Y %H:%M'))
@@ -209,7 +216,6 @@ def check_temps():
             columns = ', '.join(merged_dict.keys())
             placeholders = ':'+', :'.join(merged_dict.keys())
             query = 'INSERT INTO devices (%s) VALUES (%s)' % (columns, placeholders)
-            print(query)
             c.execute(query, merged_dict)
             conn.commit()
             print("New query inserted")
@@ -228,8 +234,4 @@ c = conn.cursor()
 
 # Get all points once
 while True:
-    try:
-        check_temps()
-    except:
-        print("Connection refused. Waiting 30 seconds.")
-        time.sleep(30)
+    check_temps()
