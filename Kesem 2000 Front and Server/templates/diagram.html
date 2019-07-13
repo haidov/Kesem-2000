@@ -65,9 +65,9 @@
                Walls
                </button>
                <div id="wallsDiv" class="menu" >
-               <div class="draggable" draggable="true" data= "" style="background-color: black; width: 50px; height: 2px"></div>
+               <div class="draggable" draggable="true" data= "" style="background-color: black; width: 50px; height: 5px"></div>
                <div class="draggable" draggable="true" style="background-color: black; width: 100%; height: 1px"></div>
-               <div class="draggable" draggable="true" style="background-color: black; width: 2px; height: 50px"></div>
+               <div class="draggable" draggable="true" style="background-color: black; width: 5px; height: 50px"></div>
                </div>
             </div>
          </center>
@@ -234,7 +234,7 @@
                   // Remove the data for the map to prevent multiple devices with same name.
                   alarmsTempsByNamesMap.delete(data.text);
                    
-                  // And also remove it from the list.\
+                  // And also remove it from the list.
                }
                else
                {
@@ -415,7 +415,7 @@
              // Remove the option from the list.
              for (var i = 0; i < all_devices.length; i++)
                  if (all_devices[i] == data)
-                   devices.children[i].remove()
+                   devices.children[i].remove();
          
              myDiagram.commitTransaction('new node');
              }
