@@ -44,7 +44,7 @@
                <form onsubmit="getDiagramJson()" method="POST">
                   <input type="hidden" id="jsonDiagram" name="jsonDiagram" />
                   <input class="dropdown-item" type="submit" value="Save" />
-                  <button class="dropdown-item" type="button" onclick="myDiagram.clear();">Clear</button>
+                  <button class="dropdown-item" type="button" onclick="myDiagram.clear()">Clear</button>
                </form>
             </div>
          </div>
@@ -176,7 +176,7 @@
                  )
               )
            );
-         jsonDiagram = {{jsonDiagram|tojson}};
+         
          if(jsonDiagram != "")
          {
            // Load it as a diagram model.
@@ -403,7 +403,7 @@
              // If we were using drag data, we could get it here, ie:
             var data = event.dataTransfer.getData('text');
              // Get the dragged object text size and color and set it as node for the diagram.
-             if (data != "" && all_devices.indexOf(data) > -1)
+             if (data.color != "black" || data != "" && all_devices.indexOf(data) > -1)
              {
                myDiagram.model.addNodeData({
                location: point,
