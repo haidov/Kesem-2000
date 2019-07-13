@@ -2,451 +2,433 @@
 <!DOCTYPE html>
 <html>
    <head>
-    <style>
-      .menu
-      {
-        width: 100%;
-        display: none;
-        background-color: white;
-        border-style: solid;
-        border-width: 2px;
-        margin-bottom: 20px;
-        margin-top: 20px;
-      }
-      
-      .menu > *
-      {
-        margin-bottom: 20px;
-        margin-top: 20px;
-        border-style: solid;
-        border-width: 1px;
-        
-      }
-      
-      .scrollable-menu {
-        height: auto;
-        max-height: 200px;
-        overflow-x: hidden;
-      }
-    </style>
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
-    <script src="https://gojs.net/latest/extensions/RotateMultipleTool.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
-   </head>   
+      <style>
+         .menu
+         {
+         width: 100%;
+         display: none;
+         background-color: white;
+         border-style: solid;
+         border-width: 2px;
+         margin-bottom: 20px;
+         margin-top: 20px;
+         }
+         .menu > *
+         {
+         margin-bottom: 20px;
+         margin-top: 20px;
+         border-style: solid;
+         border-width: 1px;
+         }
+         .scrollable-menu {
+         height: auto;
+         max-height: 200px;
+         overflow-x: hidden;
+         }
+      </style>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <script src="https://unpkg.com/gojs/release/go-debug.js"></script>
+      <script src="https://gojs.net/latest/extensions/RotateMultipleTool.js"></script>
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+   </head>
    <body class="fixed-header">
-          <div style="width: 100%; display: flex; justify-content: space-between">   
-            <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                File
-              </button> 
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <form onsubmit="getDiagramJson()" method="POST">
+      <div style="width: 100%; display: flex; justify-content: space-between">
+         <div id="fileMenu" class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            File
+            </button> 
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+               <form onsubmit="getDiagramJson()" method="POST">
                   <input type="hidden" id="jsonDiagram" name="jsonDiagram" />
                   <input class="dropdown-item" type="submit" value="Save" />
-                </form>
-              </div>
+                  <button class="dropdown-item" type="button" onclick="myDiagram.clear();">Clear</button>
+               </form>
             </div>
-            <center> 
-            <div id="items" style="width: 160px; height: 400px; margin-right: 2px; background-color: lightblue; padding: 10px;">
-                 <button style="width: 100%" class="btn btn-secondary dropdown-toggle" type="button" onclick="openOrCloseMenuById('furnitureDiv');" data-toggle="dropdown1" aria-haspopup="true" aria-expanded="false">
-                    Devices
-                  </button>
-                  <div id="furnitureDiv" class="menu" >
-                    <input list="devices" type="text" placeholder="Write Here" class="draggable" draggable="true" style="width: 100%; height:50px; background-color: white;"/>
-                      <datalist id="devices">
-                        {% for name, alarm_and_temp in alarms_temps_by_names_dict.items() %}
-                        <option value="{{name}}">
-                      {% endfor %}
-                      </datalist>
-                                      
-                  </div>
-                 <button style="width: 100%" class="btn btn-secondary dropdown-toggle" type="button" onclick="openOrCloseMenuById('wallsDiv');" data-toggle="dropdown2" aria-haspopup="true" aria-expanded="false">
-                    Walls
-                  </button>
-
-                    <div id="wallsDiv" class="menu" >
-                   <div class="draggable" draggable="true" data= "" style="background-color: black; width: 50px; height: 2px"></div>
-                   <div class="draggable" draggable="true" style="background-color: black; width: 100%; height: 1px"></div>
-                   <div class="draggable" draggable="true" style="background-color: black; width: 2px; height: 50px"></div>
-                    </div>
-                
-
-            </div>
-            </center>
-            <div id="myDiagramDiv" style="flex-grow: 1; border: solid 1px black"></div>
-          
-                <ul id="contextMenu" class="dropdown-menu scrollable-menu" role="menu">
-                    <input type="text" id="searchInput" onkeyup="searchInUlList()" placeholder="Search for names.." title="Type in a name" />
-                    {% for name, alarm_and_temp in alarms_temps_by_names_dict.items() %}
-                    <li><a onclick = "changeNameMenu('{{name}}')">{{name}}</a></li>
-                    {% endfor %}
-                </ul>
          </div>
-          
-
+         <center>
+            <div id="items" style="width: 160px; height: -webkit-fill-available; margin-right: 2px; background-color: lightblue; padding: 10px;">
+               <button style="width: 100%" class="btn btn-secondary dropdown-toggle" type="button" onclick="openOrCloseMenuById('furnitureDiv');" data-toggle="dropdown1" aria-haspopup="true" aria-expanded="false">
+               Devices
+               </button>
+               <div id="furnitureDiv" class="menu" >
+                  <input list="devices" type="text" placeholder="Write Here" class="draggable" draggable="true" style="width: 100%; height:50px; background-color: white;"/>
+                  <datalist id="devices">
+                     {% for name, alarm_and_temp in alarms_temps_by_names_dict.items() %}
+                     <option value="{{name}}">
+                        {% endfor %}
+                  </datalist>
+               </div>
+               <button style="width: 100%" class="btn btn-secondary dropdown-toggle" type="button" onclick="openOrCloseMenuById('wallsDiv');" data-toggle="dropdown2" aria-haspopup="true" aria-expanded="false">
+               Walls
+               </button>
+               <div id="wallsDiv" class="menu" >
+               <div class="draggable" draggable="true" data= "" style="background-color: black; width: 50px; height: 2px"></div>
+               <div class="draggable" draggable="true" style="background-color: black; width: 100%; height: 1px"></div>
+               <div class="draggable" draggable="true" style="background-color: black; width: 2px; height: 50px"></div>
+               </div>
+            </div>
+         </center>
+         <div id="myDiagramDiv" style="flex-grow: 1; border: solid 1px black; height: -webkit-fill-available;"></div>
+      </div>
       <script>
-      // Extentions
-      String.prototype.replaceAll = function(search, replacement) {
-        var target = this;
-        return target.replace(new RegExp(search, 'g'), replacement);
-      };
-        
-      // Context menu search and define as global for diagram.
-      var contextMenuEl = document.getElementById("contextMenu");
-      function searchInUlList() {
-          var input, filter, ul, li, a, i, txtValue;
-          input = document.getElementById("searchInput");
-          filter = input.value.toUpperCase();
-          ul = document.getElementById("contextMenu");
-          li = ul.getElementsByTagName("li");
-          for (i = 0; i < li.length; i++) {
-              a = li[i].getElementsByTagName("a")[0];
-              txtValue = a.textContent || a.innerText;
-              if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                  li[i].style.display = "";
-              } else {
-                  li[i].style.display = "none";
-              }
-          }
-      }
-          
-      // Define the diagram
-      var $ = go.GraphObject.make;
-      myDiagram = $(go.Diagram, "myDiagramDiv",  // Define the HTML div for the diagram
-        {
-          resizingTool: new go.ResizingTool(),
-          "undoManager.isEnabled": true // Enable CTRL-Z undo, CTRL-Y redo
-        });
-
-      window.PIXELRATIO = myDiagram.computePixelRatio(); // Constant needed to determine mouse coordinates on the canvas
-      myDiagram.scrollMode = go.Diagram.InfiniteScroll;
-      // Define the node template
-      myDiagram.nodeTemplate =
-        $(go.Node, "Auto",
-          new go.Binding("location"),
-          new go.Binding("desiredSize").makeTwoWay(),
-          new go.Binding("position", "pos", go.Point.parse).makeTwoWay(go.Point.stringify),
-          {
-              locationSpot: go.Spot.Center,
-              rotatable: true,
-              resizable: true,
-              doubleClick: function(e, node) {
-              var data = node.data;
-                if(data.color != "black")
-                {
-                  changeName(data);
-                }
+         // Get all options of devices
+             
+         
+         var devices = document.getElementById("devices");
+         var all_devices = [];
+             
+         for (var i = 0; i < devices.options.length; i++) {
+               all_devices.push(devices.options[i].value);
+           }
+             
+         // Then, remove the options that are already in the diagram
+         
+             // Json data for the saved diagram.
+         var jsonDiagram = {{jsonDiagram|tojson}};
+         
+             if (jsonDiagram != "")
+                 {
+                     
+                 
+                 jsonDiagram = JSON.parse(jsonDiagram);
+         for (var i = 0; i < jsonDiagram.nodeDataArray.length; i++)
+             {
+               for (var z = 0; z < all_devices.length; z++)
+                 if (all_devices[z] == jsonDiagram.nodeDataArray[i].text)
+                   devices.children[z].remove()
+             }
+                 }
+             
+         // Check Parent - edit or show
+         var page = top.document.location.pathname;
+         var read_only = false;
+             
+         if (page == "/")
+         {
+           // Home logic - only show menues
+           $("#dropdownMenuButton").hide();
+           $("#items").hide();
+           read_only = true;
+         }
+         
+         // Extentions
+         String.prototype.replaceAll = function(search, replacement) {
+           var target = this;
+           return target.replace(new RegExp(search, 'g'), replacement);
+         };
+             
+         // Define the diagram
+         var $ = go.GraphObject.make;
+         myDiagram = $(go.Diagram, "myDiagramDiv",  // Define the HTML div for the diagram
+           {
+             resizingTool: new go.ResizingTool(),
+             "undoManager.isEnabled": true // Enable CTRL-Z undo, CTRL-Y redo
+           });
+         
+         window.PIXELRATIO = myDiagram.computePixelRatio(); // Constant needed to determine mouse coordinates on the canvas
+         myDiagram.scrollMode = go.Diagram.InfiniteScroll;
+         myDiagram.isReadOnly = read_only;
+             
+         // Define the node template
+         myDiagram.nodeTemplate =
+           $(go.Node, "Auto",
+             new go.Binding("location"),
+             new go.Binding("desiredSize").makeTwoWay(),
+             new go.Binding("position", "pos", go.Point.parse).makeTwoWay(go.Point.stringify),
+             {
+                 locationSpot: go.Spot.Center,
+                 rotatable: true,
+                 resizable: true,
+                 // uncomment the follwing in order to fire the double click funk
+                 /* doubleClick: function(e, node) {
+                 var data = node.data;
+                   if(data.color != "black")
+                   {
+                     changeName(data);
+                   }
+                 }, */
               },
-            // Set the context menu for the nodes.
-            contextMenu:
-                $(go.HTMLInfo, {
-                    show: showContextMenu,
-                    mainElement: contextMenuEl
-                })
-           },
-          
-          new go.Binding("angle").makeTwoWay(),  // Save the modified Node.angle in the model data
-          new go.Binding("width"),
-          new go.Binding("height"),
-          $(go.Shape, "Rectangle",
-            // Shape.fill is bound to Node.data.color
-            {"fill": "white"}, // Set default color white
-            new go.Binding("fill", "color")
-           ),
-            
-          $(go.Panel, "Vertical",  // everything within the border
-             // Device name block.
-            $(go.TextBlock,
-                { margin: 3, font: "bold 16px sans-serif", textAlign: 'center' },
-                new go.Binding("text")
+             
+             new go.Binding("angle").makeTwoWay(),  // Save the modified Node.angle in the model data
+             new go.Binding("width"),
+             new go.Binding("height"),
+             $(go.Shape, "Rectangle",
+               // Shape.fill is bound to Node.data.color
+               {"fill": "white"}, // Set default color white
+               new go.Binding("fill", "color")
               ),
-            
-              // Temperature block.
-             $(go.TextBlock,
-                  { textAlign: "center" },
-                  new go.Binding("text", "temperature"),
-                  new go.Binding("background", "tempColor")
+               
+             $(go.Panel, "Vertical",  // everything within the border
+                // Device name block.
+               $(go.TextBlock,
+                   { margin: 3, font: "bold 16px sans-serif", textAlign: 'center' },
+                   new go.Binding("text")
+                 ),
+               
+                 // Temperature block.
+                $(go.TextBlock,
+                     { textAlign: "center" },
+                     new go.Binding("text", "temperature"),
+                     new go.Binding("background", "tempColor")
+                 )
               )
-           )
-        );
-
-        
-          // also define a context menu for the diagram's background
-          myDiagram.contextMenu =
-            $("ContextMenu",
-              $("ContextMenuButton",
-                $(go.TextBlock, "Undo"),
-                { click: function(e, obj) { e.diagram.commandHandler.undo(); } },
-                new go.Binding("visible", "", function(o) {
-                  return o.diagram.commandHandler.canUndo();
-                }).ofObject()
-                ),                                
-              $("ContextMenuButton",
-                $(go.TextBlock, "Redo"),
-                { click: function(e, obj) { e.diagram.commandHandler.redo(); } },
-                new go.Binding("visible", "", function(o) {
-                  return o.diagram.commandHandler.canRedo();
-                }).ofObject())
-              );
-      
-      // Json data for the saved diagram.
-      var jsonDiagram = {{jsonDiagram|tojson}};
-      if(jsonDiagram != "")
-      {
-        // Load it as a diagram model.
-        myDiagram.model = go.Model.fromJson(jsonDiagram);
-      }
-      
-      // Get the alarm color.
-      function getAlramColor(colorNumber)
-      {
-        switch(colorNumber)
-        {
-          case 0: return "green";
-          case 1: return "blue";
-          case 2: return "coral";
-          default: return "red";
-        }
-      }
-      
-      function showContextMenu(obj, diagram, tool) {
-        
-        // Filterring walls from contextmenu.
-        var isDeviceNode = true;
-        myDiagram.selection.each(function(node) {if(isDeviceNode) isDeviceNode = node.data.color != "black"});
-        if(!isDeviceNode) return false;
-        
-        // Show the context menu element
-        contextMenuEl.style.display = "block";
-        // we don't bother overriding positionContextMenu, we just do it here:
-        var mousePt = diagram.lastInput.viewPoint;
-        var diagramBounds = document.getElementById("myDiagramDiv").getBoundingClientRect();
-        contextMenuEl.style.left = (diagramBounds.x + mousePt.x) + "px";
-        contextMenuEl.style.top = (diagramBounds.y + 20 + mousePt.y) + "px";
-      }
-      
-      // Get the alarms and temperatures for the nodes as map. devices name = key, [alarms, temps] = value.
-      var alarmsTempsByNamesJson = {{alarms_temps_by_names_dict|tojson|tojson}};
-      var alarmsTempsByNamesMap = new Map(Object.entries(JSON.parse(alarmsTempsByNamesJson)));
-      
-      const ALARM = 0;
-      const TEMP = 1;
-      myDiagram.nodes.each(function(node) {
-        var data = node.data;
-        if (data.color != "black") // Ignore walls (color black)
-        {
-            if(alarmsTempsByNamesMap.has(data.text)) // Ignore nodes that have illegal name or was here before.
-            {
-                // Set the node color by the alarms.
-                var node_alarm_and_temp = alarmsTempsByNamesMap.get(data.text);
-                var tempColor = getAlramColor(parseInt(node_alarm_and_temp[ALARM]));
-                myDiagram.model.set(data, "color", "light" + tempColor);
-                // Set mouse hover event for temperatures.
-                myDiagram.model.set(data, "tempColor", tempColor);
-                myDiagram.model.set(data, "temperature", "Temperature: " + node_alarm_and_temp[TEMP]);
-
-               // Remove the data for the map to prevent multiple devices with same name.
-               alarmsTempsByNamesMap.delete(data.text);
-            }
-            else
-            {
-                // Set white color and no temperature if name is illegal
-                myDiagram.model.set(data, "color", "white");
-                myDiagram.model.set(data, "temperature", "");
-            }
-        }
-      });
-      
-      
-      /*
-      // Unescape html that we get from jinja2 flask
-      function htmlDecode(input){
-          var e = document.createElement('textarea');
-          e.innerHTML = input;
-          // handle case of empty input
-          return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
-      }
-      */
-      
-      // Change the name of the selected node by the newName parameter.
-      function changeNameMenu(newName)
-      {
-        myDiagram.startTransaction("change color");
-        myDiagram.selection.each(function(node) {
-          myDiagram.model.setDataProperty(node.data, "text", newName);
-        });
-        myDiagram.commitTransaction("change color");
-        myDiagram.currentTool.stopTool();
-      }
-      
-      // Change the node name by node.data. The name will be received by prompt message
-      function changeName(data)
-      {
-          var newName = prompt("Write The New Name: ", data.text);
-          if(newName != null)
-          {
-            myDiagram.model.set(data, "text", newName);
-          }
-      }
-      
-      // Transaction for dragged nodes.
-      function highlight(node) { 
-        var oldskips = myDiagram.skipsUndoManager;
-        myDiagram.skipsUndoManager = true;
-        myDiagram.startTransaction("highlight");
-        if (node !== null) {
-          myDiagram.highlight(node);
-        } else {
-          myDiagram.clearHighlighteds();
-        }
-        myDiagram.commitTransaction("highlight");
-        myDiagram.skipsUndoManager = oldskips;
-      }
-
-
-      // Open or close drop down menu.
-      function openOrCloseMenuById(menuName)
-      {
-        var currentDisplay = document.getElementById(menuName).style.display;
-        document.getElementById(menuName).style.display = currentDisplay == "block" ? "none" : "block";
-      }
-      
-      
-      var dragged = null; 
-      // This event should only fire on the drag targets.
-      // Instead of finding every drag target,
-      // we can add the event to the document and disregard
-      // all elements that are not of class "draggable"
-      document.addEventListener("dragstart", function(event) {
-        if (event.target.className !== "draggable") return;
-        // Some data must be set to allow drag
-        event.dataTransfer.setData("text", event.target.value);
-        event.dataTransfer.setData("width", event.target.offsetWidth);
-        event.dataTransfer.setData("height", event.target.offsetHeight);
-        event.dataTransfer.setData("color", event.target.style.backgroundColor);
-
-        // store a reference to the dragged element and the offset of the mouse from the center of the element
-        dragged = event.target;
-        dragged.offsetX = event.offsetX - dragged.clientWidth / 2;
-        dragged.offsetY = event.offsetY - dragged.clientHeight / 2;
-        // Objects during drag will have a red border
-        event.target.style.border = "2px solid red";
-      }, false);
-
-      // This event resets styles after a drag has completed (successfully or not)
-      document.addEventListener("dragend", function(event) {
-        // reset the border of the dragged element
-        dragged.style.border = "";
-        highlight(null);
-      }, false);
-
-      // Next, events intended for the drop target - the Diagram div
-      var div = document.getElementById("myDiagramDiv");
-      div.addEventListener("dragenter", function(event) {
-      
-        // Here you could also set effects on the Diagram,
-        // such as changing the background color to indicate an acceptable drop zone
-        // Requirement in some browsers, such as Internet Explorer
-        event.preventDefault();
-      }, false);
-
-      div.addEventListener("dragover", function(event) {
-        // We call preventDefault to allow a drop
-        // But on divs that already contain an element,
-        // we want to disallow dropping
-
-        if (this === myDiagram.div) {
-          var can = event.target;
-          var pixelratio = window.PIXELRATIO;
-
-          // if the target is not the canvas, we may have trouble, so just quit:
-          if (!(can instanceof HTMLCanvasElement)) return;
-
-          var bbox = can.getBoundingClientRect();
-          var bbw = bbox.width;
-          if (bbw === 0) bbw = 0.001;
-          var bbh = bbox.height;
-          if (bbh === 0) bbh = 0.001;
-          var mx = event.clientX - bbox.left * ((can.width / pixelratio) / bbw);
-          var my = event.clientY - bbox.top * ((can.height / pixelratio) / bbh);
-          var point = myDiagram.transformViewToDoc(new go.Point(mx, my));
-          var curnode = myDiagram.findPartAt(point, true);
-          if (curnode instanceof go.Node) {
-            highlight(curnode);
-          } else {
-            highlight(null);
-          }
-        }
-
-
-        if (event.target.className === "dropzone") {
-          // Disallow a drop by returning before a call to preventDefault:
-          return;
-        }
-        // Allow a drop on everything else
-        event.preventDefault();
-      }, false);
-
-
-      div.addEventListener("dragleave", function(event) {
-        // reset background of potential drop target
-        if (event.target.className == "dropzone") {
-          event.target.style.background = "";
-        }
-        highlight(null);
-      }, false);
-
-      
-      div.addEventListener("drop", function(event) {
-        // Prevent default action.
-        // (open as link for some elements in some browsers)
-        event.preventDefault();
-
-        // Dragging onto a Diagram.
-        if (this === myDiagram.div) {
-          var can = event.target;
-          var pixelratio = window.PIXELRATIO;
-            console.log(event.dataTransfer);
-          // If the target is not the canvas, we may have trouble, so just quit:
-          if (!(can instanceof HTMLCanvasElement)) return;
-
-          var bbox = can.getBoundingClientRect();
-          var bbw = bbox.width;
-          if (bbw === 0) bbw = 0.001;
-          var bbh = bbox.height;
-          if (bbh === 0) bbh = 0.001;
-          var mx = event.clientX - bbox.left * ((can.width / pixelratio) / bbw) - dragged.offsetX;
-          var my = event.clientY - bbox.top * ((can.height / pixelratio) / bbh) - dragged.offsetY;
-          var point = myDiagram.transformViewToDoc(new go.Point(mx, my));
-          myDiagram.startTransaction('new node');
-          var width = parseInt(event.dataTransfer.getData('width')),
-          height = parseInt(event.dataTransfer.getData('height'));
-          
-          // Get the dragged object text size and color and set it as node for the diagram.
-          myDiagram.model.addNodeData({
-            location: point,
-            text: event.dataTransfer.getData('text'),
-            desiredSize: new go.Size(width, height),
-            color: event.dataTransfer.getData('color')
-          });
-          myDiagram.commitTransaction('new node');
-
-        }
-        // If we were using drag data, we could get it here, ie:
-        // var data = event.dataTransfer.getData('text');
-      }, false);
-        
-      // Set json data for the post request before submitting.
-      function getDiagramJson()
-      {
-        document.getElementById("jsonDiagram").value = myDiagram.model.toJson();
-      }
-      
+           );
+         jsonDiagram = {{jsonDiagram|tojson}};
+         if(jsonDiagram != "")
+         {
+           // Load it as a diagram model.
+           myDiagram.model = go.Model.fromJson(jsonDiagram);
+         }
+         
+         // Get the alarm color.
+         function getAlramColor(colorNumber)
+         {
+           switch(colorNumber)
+           {
+             case 0: return "green";
+             case 1: return "blue";
+             case 2: return "coral";
+             default: return "red";
+           }
+         }
+         
+         function showContextMenu(obj, diagram, tool) {
+           
+           // Filterring walls from contextmenu.
+           var isDeviceNode = true;
+           myDiagram.selection.each(function(node) {if(isDeviceNode) isDeviceNode = node.data.color != "black"});
+           if(!isDeviceNode) return false;
+           
+           // Show the context menu element
+           contextMenuEl.style.display = "block";
+           // we don't bother overriding positionContextMenu, we just do it here:
+           var mousePt = diagram.lastInput.viewPoint;
+           var diagramBounds = document.getElementById("myDiagramDiv").getBoundingClientRect();
+           contextMenuEl.style.left = (diagramBounds.x + mousePt.x) + "px";
+           contextMenuEl.style.top = (diagramBounds.y + 20 + mousePt.y) + "px";
+         }
+         
+         // Get the alarms and temperatures for the nodes as map. devices name = key, [alarms, temps] = value.
+         var alarmsTempsByNamesJson = {{alarms_temps_by_names_dict|tojson|tojson}};
+         var alarmsTempsByNamesMap = new Map(Object.entries(JSON.parse(alarmsTempsByNamesJson)));
+         
+         const ALARM = 0;
+         const TEMP = 1;
+         myDiagram.nodes.each(function(node) {
+           var data = node.data;
+           if (data.color != "black") // Ignore walls (color black)
+           {
+               if(alarmsTempsByNamesMap.has(data.text)) // Ignore nodes that have illegal name or was here before.
+               {
+                   // Set the node color by the alarms.
+                   var node_alarm_and_temp = alarmsTempsByNamesMap.get(data.text);
+                   var tempColor = getAlramColor(parseInt(node_alarm_and_temp[ALARM]));
+                   myDiagram.model.set(data, "color", "light" + tempColor);
+                   // Set mouse hover event for temperatures.
+                   myDiagram.model.set(data, "tempColor", tempColor);
+                   myDiagram.model.set(data, "temperature", "TMP: " + node_alarm_and_temp[TEMP]);
+         
+                  // Remove the data for the map to prevent multiple devices with same name.
+                  alarmsTempsByNamesMap.delete(data.text);
+                   
+                  // And also remove it from the list.\
+               }
+               else
+               {
+                   // Set white color and no temperature if name is illegal
+                   myDiagram.model.set(data, "color", "white");
+                   myDiagram.model.set(data, "temperature", "");
+               }
+           }
+         });
+         
+         // Change the name of the selected node by the newName parameter.
+         function changeNameMenu(newName)
+         {
+           myDiagram.startTransaction("change color");
+           myDiagram.selection.each(function(node) {
+             myDiagram.model.setDataProperty(node.data, "text", newName);
+           });
+           myDiagram.commitTransaction("change color");
+           myDiagram.currentTool.stopTool();
+         }
+         
+         // Change the node name by node.data. The name will be received by prompt message
+         function changeName(data)
+         {
+             var newName = prompt("Write The New Name: ", data.text);
+             if(newName != null)
+             {
+               myDiagram.model.set(data, "text", newName);
+             }
+         }
+         
+         // Transaction for dragged nodes.
+         function highlight(node) { 
+           var oldskips = myDiagram.skipsUndoManager;
+           myDiagram.skipsUndoManager = true;
+           myDiagram.startTransaction("highlight");
+           if (node !== null) {
+             myDiagram.highlight(node);
+           } else {
+             myDiagram.clearHighlighteds();
+           }
+           myDiagram.commitTransaction("highlight");
+           myDiagram.skipsUndoManager = oldskips;
+         }
+         
+         
+         // Open or close drop down menu.
+         function openOrCloseMenuById(menuName)
+         {
+           var currentDisplay = document.getElementById(menuName).style.display;
+           document.getElementById(menuName).style.display = currentDisplay == "block" ? "none" : "block";
+         }
+         
+         
+         var dragged = null; 
+         // This event should only fire on the drag targets.
+         // Instead of finding every drag target,
+         // we can add the event to the document and disregard
+         // all elements that are not of class "draggable"
+         document.addEventListener("dragstart", function(event) {
+           if (event.target.className !== "draggable") return;
+           // Some data must be set to allow drag
+           event.dataTransfer.setData("text", event.target.value);
+           event.dataTransfer.setData("width", event.target.offsetWidth);
+           event.dataTransfer.setData("height", event.target.offsetHeight);
+           event.dataTransfer.setData("color", event.target.style.backgroundColor);
+         
+           // store a reference to the dragged element and the offset of the mouse from the center of the element
+           dragged = event.target;
+           dragged.offsetX = event.offsetX - dragged.clientWidth / 2;
+           dragged.offsetY = event.offsetY - dragged.clientHeight / 2;
+           // Objects during drag will have a red border
+           event.target.style.border = "2px solid red";
+         }, false);
+         
+         // This event resets styles after a drag has completed (successfully or not)
+         document.addEventListener("dragend", function(event) {
+           // reset the border of the dragged element
+           dragged.style.border = "";
+           highlight(null);
+         }, false);
+         
+         // Next, events intended for the drop target - the Diagram div
+         var div = document.getElementById("myDiagramDiv");
+         div.addEventListener("dragenter", function(event) {
+         
+           // Here you could also set effects on the Diagram,
+           // such as changing the background color to indicate an acceptable drop zone
+           // Requirement in some browsers, such as Internet Explorer
+           event.preventDefault();
+         }, false);
+         
+         div.addEventListener("dragover", function(event) {
+           // We call preventDefault to allow a drop
+           // But on divs that already contain an element,
+           // we want to disallow dropping
+         
+           if (this === myDiagram.div) {
+             var can = event.target;
+             var pixelratio = window.PIXELRATIO;
+         
+             // if the target is not the canvas, we may have trouble, so just quit:
+             if (!(can instanceof HTMLCanvasElement)) return;
+         
+             var bbox = can.getBoundingClientRect();
+             var bbw = bbox.width;
+             if (bbw === 0) bbw = 0.001;
+             var bbh = bbox.height;
+             if (bbh === 0) bbh = 0.001;
+             var mx = event.clientX - bbox.left * ((can.width / pixelratio) / bbw);
+             var my = event.clientY - bbox.top * ((can.height / pixelratio) / bbh);
+             var point = myDiagram.transformViewToDoc(new go.Point(mx, my));
+             var curnode = myDiagram.findPartAt(point, true);
+             if (curnode instanceof go.Node) {
+               highlight(curnode);
+             } else {
+               highlight(null);
+             }
+           }
+         
+         
+           if (event.target.className === "dropzone") {
+             // Disallow a drop by returning before a call to preventDefault:
+             return;
+           }
+           // Allow a drop on everything else
+           event.preventDefault();
+         }, false);
+         
+         
+         div.addEventListener("dragleave", function(event) {
+           // reset background of potential drop target
+           if (event.target.className == "dropzone") {
+             event.target.style.background = "";
+           }
+           highlight(null);
+         }, false);
+         
+         
+         div.addEventListener("drop", function(event) {
+           // Prevent default action.
+           // (open as link for some elements in some browsers)
+           event.preventDefault();
+         
+           // Dragging onto a Diagram.
+           if (this === myDiagram.div) {
+             
+             var can = event.target;
+             var pixelratio = window.PIXELRATIO;
+               console.log(event.dataTransfer);
+             // If the target is not the canvas, we may have trouble, so just quit:
+             if (!(can instanceof HTMLCanvasElement)) return;
+         
+             var bbox = can.getBoundingClientRect();
+             var bbw = bbox.width;
+             if (bbw === 0) bbw = 0.001;
+             var bbh = bbox.height;
+             if (bbh === 0) bbh = 0.001;
+             var mx = event.clientX - bbox.left * ((can.width / pixelratio) / bbw) - dragged.offsetX;
+             var my = event.clientY - bbox.top * ((can.height / pixelratio) / bbh) - dragged.offsetY;
+             var point = myDiagram.transformViewToDoc(new go.Point(mx, my));
+             myDiagram.startTransaction('new node');
+             var width = parseInt(event.dataTransfer.getData('width')),
+             height = parseInt(event.dataTransfer.getData('height'));
+               
+             // If we were using drag data, we could get it here, ie:
+            var data = event.dataTransfer.getData('text');
+             // Get the dragged object text size and color and set it as node for the diagram.
+             if (data != "" && all_devices.indexOf(data) > -1)
+             {
+               myDiagram.model.addNodeData({
+               location: point,
+               text: event.dataTransfer.getData('text'),
+               desiredSize: new go.Size(width, height),
+               color: event.dataTransfer.getData('color')
+               });
+         
+             // Remove the option from the list.
+             for (var i = 0; i < all_devices.length; i++)
+                 if (all_devices[i] == data)
+                   devices.children[i].remove()
+         
+             myDiagram.commitTransaction('new node');
+             }
+           }
+           document.querySelector("#furnitureDiv > input").value = "";
+         }, false);
+           
+         // Set json data for the post request before submitting.
+         function getDiagramJson()
+         {
+           document.getElementById("jsonDiagram").value = myDiagram.model.toJson();
+         }
+         
       </script>
    </body>
 </html>
