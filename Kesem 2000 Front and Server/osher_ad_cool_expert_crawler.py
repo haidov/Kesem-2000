@@ -9,6 +9,7 @@ import time
 import urllib
 from urllib.request import urlopen
 import os.path
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -92,7 +93,7 @@ def create_devices_table():
     for point in all_points:
         c.execute("ALTER TABLE devices ADD COLUMN '%s' 'INT'" % point)
 
-def check_temps():    
+def check_temps():
     print("THE BEGINNING")
     guid = 0
     while True:
@@ -139,10 +140,27 @@ def check_temps():
                     for bit in all_points:
                         if bit[:9] == "nvo_alarm":
                             all_specific_points.update({bit : 0})
+
+                url = """http://212.29.254.24:18220/request.lp?url=modules/overview/requests/getAlarms&alarmtbl={\"""" + nid + """\":\"""" + str(guid) + "\"}&cmd=updateAlarms"""
+                url = str(url)
+                r = rs.post(url)
+
+                data  = r.content
+                data = str(data)
+
+                data = re.search("""Alarm list::(.+?)\"""", data).group(1)
+                
+                if data == "-- no active alarms --":
+                    alarm = "0"                   
+                else:
+                    alarm = data
+                    alarm = alarm.replace(r"01 - \xd7\x93\xd7\x9c\xd7\xaa \xd7\xa4\xd7\xaa\xd7\x95\xd7\x97\xd7\x94 - Digital input 1 = 1 for at least 60 minutes.<br>", "דלת פתוחה")
+                    print("Alarm: " + alarm)
+
                 unix = time.time()
                 date = str(datetime.datetime.fromtimestamp(unix).strftime('%d-%m-%Y %H:%M'))
 
-                shared_dict = {"timestamp": date, "device_id": guid, "name": name, "nid": nid, "alarm": 0}
+                shared_dict = {"timestamp": date, "device_id": guid, "name": name, "nid": nid, "alarm": alarm}
                 merged_dict = {**shared_dict, **all_specific_points}
                 
                 conn = sqlite3.connect('osher_ad_cool_expert_table.db')
