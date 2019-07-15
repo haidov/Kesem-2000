@@ -30,7 +30,6 @@ except:
     print ("shit")
 '''
 
-
 def Log(action_to_log):
     with open('log.txt', 'a', encoding="utf-8") as outfile:  
         now = datetime.now()
@@ -407,9 +406,6 @@ class CustomerForm(Form):
     email = StringField('Email', [validators.Length(min=1, max=50)])
     address = StringField('Address', [validators.Length(min=1, max=50)])
     contact_name = StringField('Contact Name', [validators.Length(min=1, max=50)])
-    view_mode = SelectField(label='View Mode', 
-        choices=[('controller_view', 'Controller View'), ('floor_plan_view', "Floor Plan View")])
-
 
 @app.route('/<path:page>', methods=['GET' ,'POST'])
 def show(page):
@@ -434,13 +430,12 @@ def add_customer():
         email = form.email.data
         address = form.address.data
         contact_name = form.address.data
-        view_mode = form.view_mode.data
 
         # Enter to the database
         conn = lite.connect('customers.db')
         curs = conn.cursor()
         print ("customers.db was opened successfully")
-        curs.execute('INSERT INTO customers (name, ip, port, username, password, provider, phone, email, address, contact_name, view_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (name, ip, port, username, password, provider, phone, email, address, contact_name, view_mode))
+        curs.execute('INSERT INTO customers (name, ip, port, username, password, provider, phone, email, address, contact_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (name, ip, port, username, password, provider, phone, email, address, contact_name))
         conn.commit()
         curs.close()
         
@@ -761,13 +756,12 @@ def edit_customer():
         email = form.email.data
         address = form.address.data
         contact_name = form.address.data
-        view_mode = form.view_mode.data
 
         # Enter to the database
         conn = lite.connect('customers.db')
         curs = conn.cursor()
         print("customers.db was opened successfully")
-        q = '''UPDATE customers SET name = \'''' + str(name) + '''\', ip = \'''' + str(ip) + '''\', port = \'''' + str(port) + '''\', username = \'''' + str(username) + '''\', password = \'''' + str(password) + '''\', provider = \'''' + str(provider) + '''\', phone = \'''' + str(phone) + '''\', email = \'''' + str(email) + '''\', address = \'''' + str(address) + '''\', contact_name = \'''' + str(contact_name) + '''\', view_mode = \'''' + str(view_mode) + '''\' WHERE id = 1 '''
+        q = '''UPDATE customers SET name = \'''' + str(name) + '''\', ip = \'''' + str(ip) + '''\', port = \'''' + str(port) + '''\', username = \'''' + str(username) + '''\', password = \'''' + str(password) + '''\', provider = \'''' + str(provider) + '''\', phone = \'''' + str(phone) + '''\', email = \'''' + str(email) + '''\', address = \'''' + str(address) + '''\', contact_name = \'''' + str(contact_name) + '''\' WHERE id = 1 '''
         curs.execute(q)
         conn.commit()
         curs.close()
