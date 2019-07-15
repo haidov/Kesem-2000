@@ -23,9 +23,8 @@
             {% set n_of_alarms = [] %}
             
             {% if customer[0]["provider"] == "Cool Expert" %}
-            
             {% for d in customer[1] %}
-            {% if d['Nvoalarmrelay'] == '0' %}  {% if n_of_alarms.append('1') %}{% endif %} {% endif %} 
+            {% if d['Alarm'] != '0' %}  {% if n_of_alarms.append('1') %}{% endif %} {% endif %} 
             {% endfor %}
             {% endif %}
 
@@ -78,11 +77,12 @@
                      {% endif %}
                      <div class="col-lg-4">
                         <a href="{{customer[0]['name']}}/device/{{d['Name']}}">
-                        <button class="btn-sm m-t-10 btn-block {% if d['nvoStandby'] != '0' %} btn btn-success" {% endif %} 
+                        <button class="btn-sm m-t-10 btn-block {% if d['Alarm'] != '0' %} btn btn-danger" {% endif %}
+                        {% if d['nvoStandby'] != '0' %} btn btn-success" {% endif %}
                         {% if d['Nvoalarmrelay'] == '0' %} btn btn-warning" {% endif %} 
                         {% if d['nvoStandby'] != '0' %} btn btn-default" {% endif %} 
                         {% if d['Nvocool'] != '0' %} btn btn-complete" {% endif %} 
-                        {% if d['Nvodefroststate'] != '0' %} btn btn-danger" {% endif %} 
+
                         data-toggle="tooltip" data-placement="top" title="Set: {{d['Nvothermostsetpt']}}">
                         {{d['Name']}}  TMP: {{d['Nvoairtemp']}}
                      </div>
@@ -187,17 +187,17 @@
             });
       };
       */
-      
+      /*
       function reload() {
           $.ajax("/").done(function(reply) {
              console.log(reply);
-              $("body").html(reply);
+          //    $("body").html(reply);
           //    $("button").each(function() {
           //        $(this).text(decode($(this).text()));
           //    });
           });
       }
-      setTimeout(reload, 22222222);
+      setTimeout(reload, 5555555); */
       $().button('toggle')	
       /*
       number_of_alarms = 0
