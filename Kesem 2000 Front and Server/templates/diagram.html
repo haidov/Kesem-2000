@@ -75,7 +75,6 @@
       </div>
       <script>
          // Get all options of devices
-             
          
          var devices = document.getElementById("devices");
          var all_devices = [];
@@ -142,14 +141,16 @@
                  locationSpot: go.Spot.Center,
                  rotatable: true,
                  resizable: true,
-                 // uncomment the follwing in order to fire the double click funk
-                 /* doubleClick: function(e, node) {
+                 doubleClick: function(e, node) {
                  var data = node.data;
                    if(data.color != "black")
                    {
-                     changeName(data);
+                     console.log(data)
+                     var customer = window.location.pathname;
+                     customer = customer.replace("/diagram", "")
+                     top.window.location.href = customer + "device/" + data.text + "/";
                    }
-                 }, */
+                 },
               },
              
              new go.Binding("angle").makeTwoWay(),  // Save the modified Node.angle in the model data
