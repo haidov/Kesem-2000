@@ -90,7 +90,7 @@ def create_devices_table():
    new_list_labels = []
    conn = sqlite3.connect('osher_ad_rdm_table.db')
    c = conn.cursor()
-   c.execute('CREATE TABLE IF NOT EXISTS devices(id INTEGER PRIMARY KEY, timestamp TEXT, name TEXT, state TEXT, alarm TEXT)')
+   c.execute('CREATE TABLE IF NOT EXISTS devices(id INTEGER PRIMARY KEY, timestamp TEXT, device_id TEXT, name TEXT, state TEXT, alarm TEXT)')
    all_points_labels = get_all_points()
    
    for point in all_points_labels:
@@ -206,7 +206,7 @@ def check_temps():
          all_specific_points.update({n : v})
       unix = time.time()
       date = str(datetime.datetime.fromtimestamp(unix).strftime('%d-%m-%Y %H:%M'))
-      shared_dict = {"timestamp": date, "name": all_devices[i], "state": all_states[i], "alarm": alarm}
+      shared_dict = {"timestamp": date, "device_id": i, "name": all_devices[i], "state": all_states[i], "alarm": alarm}
       merged_dict = {**shared_dict, **all_specific_points}
       
       conn = sqlite3.connect('osher_ad_rdm_table.db')
