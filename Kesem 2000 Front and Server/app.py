@@ -126,7 +126,7 @@ def getAllAlarms(db_name):
     db_conn = lite.connect(db_name)
     c = db_conn.cursor()
     c.execute('''
-                select Name,Alarm,Timestamp from devices order by Name,Timestamp
+                SELECT Name, device_id, Alarm, Timestamp FROM devices ORDER BY device_id, Timestamp
               '''
               )
     data = []
@@ -139,13 +139,18 @@ def getAllAlarms(db_name):
 # this function finds the range of a given state(in error, no errors, other error types)
 def findStateRange(data, index):
     deviceName = data[index][0]
-    initial_state = data[index][1]
-    initial_timestamp = data[index][2]
-    while index < (len(data) - 1) and data[index][1] == initial_state and deviceName == data[index][0]:
+    device_id = data[index][1]
+    initial_state = data[index][2]
+    initial_timestamp = data[index][3]
+    print("deviceName: " + deviceName)
+    print("device_id: " + device_id)
+    print("initial_state: " + initial_state)
+    print("initial_timestamp: " + initial_timestamp)
+    while index < (len(data) - 1) and data[index][2] == initial_state and device_id == data[index][1]:
         index += 1
-    final_timestamp = data[index - 1][2]
+    final_timestamp = data[index - 1][3]
     if index == (len(data) - 1):
-        final_timestamp = data[index][2]
+        final_timestamp = data[index][3]
     lastIndex = index
     return deviceName, initial_state, "%s - %s" % (initial_timestamp, final_timestamp), lastIndex
 
@@ -570,7 +575,7 @@ def diagram(customer_name):
         with io.open(jsonDiagramFileName, 'r', encoding='utf8') as jsonDiagramFile:  
             jsonDiagram = jsonDiagramFile.read()
 
-    return render_template('diagram.html', jsonDiagram=jsonDiagram, alarms_temps_by_names_dict=alarms_temps_by_names_dict)
+    return render_template('diagram.html', jsonDiagram=jsonDiagram, alarms_temps_by_names_dict=alarms_temps_by_names_dict, customer_name=customer_name)
 
 
 
