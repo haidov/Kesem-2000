@@ -155,6 +155,7 @@ def check_temps():
                 else:
                     alarm = data
                     alarm = alarm.replace(r"01 - \xd7\x93\xd7\x9c\xd7\xaa \xd7\xa4\xd7\xaa\xd7\x95\xd7\x97\xd7\x94 - Digital input 1 = 1 for at least 60 minutes.<br>", "דלת פתוחה")
+                    alarm = alarm.replace(r"01 - \xd7\x90\xd7\x93\xd7\x9d \xd7\x9c\xd7\x9b\xd7\x95\xd7\x93 - Digital input 2 = 1 for at least 0 minutes.<br>", "אדם לכוד")
                     print("Alarm: " + alarm)
 
                 unix = time.time()
